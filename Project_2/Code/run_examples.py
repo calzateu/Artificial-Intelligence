@@ -54,3 +54,36 @@ def call_graph_response_surface(inputs, variable_x, variable_y,
                            animation_velocity=animation_velocity,
                            save_graphs=save_graphs,
                            save_animation=save_animation)
+
+
+def run_system_all_chases(inputs, t_norms, s_norms, defuzz_methods,
+                          save_graphs=False):
+    for t_norm in t_norms:
+        for s_norm in s_norms:
+            run_system_graphics(inputs, t_norm, s_norm, defuzz_methods,
+                       save_graphs=save_graphs)
+
+
+def run_graph_response_surface_all_chases(inputs, x_variables, y_variables,
+                                          animations, t_norms, s_norms,
+                                          defuzz_methods,
+                                          animation_velocity=1,
+                                          save_graphs=False,
+                                          save_animation=False):
+    for t_norm in t_norms:
+        for s_norm in s_norms:
+            for axis_x in x_variables:
+                for axis_y in y_variables:
+                    if axis_x == axis_y:
+                        continue
+                    for animation in animations:
+                        if animation == axis_x or animation == axis_y:
+                            continue
+                        print(f"Axis X: {axis_x}, Axis Y: {axis_y}, Animation: {animation}")
+                        call_graph_response_surface(inputs, axis_x, axis_y,
+                                                    animation=animation,
+                                                    defuzz_methods=defuzz_methods,
+                                                    t_norm=t_norm, s_norm=s_norm,
+                                                    animation_velocity=animation_velocity,
+                                                    save_graphs=save_graphs,
+                                                    save_animation=save_animation)
