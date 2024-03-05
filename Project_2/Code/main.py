@@ -17,3 +17,5 @@ if __name__ == '__main__':
     # Get results
     synthetic_data = generate_synthetic_data(min_val, max_val, num_samples,
                                              save_results=True)
+
+    # pass

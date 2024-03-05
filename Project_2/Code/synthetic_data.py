@@ -1,4 +1,5 @@
 import fuzzy_functions
+import input_output as io
 import numpy as np
 
 
@@ -42,18 +43,8 @@ def generate_synthetic_data(min_val, max_val, num_samples,
 
 
     if save_results:
-        for method in defuzz_methods:
-            output_values = [entry[method] for entry in results]
-            output_filename = f"Project_2/outputs/output_{method}.csv"
-
-            # Save input and output variables to a CSV file
-            data = np.column_stack((withdrawal_percentage, hour,
-                                    transactions_per_day,
-                                    transactions_per_month, output_values))
-            header = "withdrawal_percentage,hour,transactions_per_day," + \
-                "transactions_per_month,output"
-            np.savetxt(output_filename, data, delimiter=',', header=header, comments='')
-
-            print(f"Saved results for {method} in {output_filename}")
+        io.save_fuzzy_system_results(results, withdrawal_percentage,
+                                     hour, transactions_per_day,
+                                     transactions_per_month)
 
     return results
