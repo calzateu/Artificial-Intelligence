@@ -43,4 +43,3 @@ def generate_prbs_signal(size, min_value, max_value, order, taps, duration,
         plt.show()
 
     return scaled_prbs_signal
-
