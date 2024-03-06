@@ -15,12 +15,11 @@ if __name__ == '__main__':
     max_vals = [1, 24, 49, 49]
 
     # Generate 10000 samples
-    num_samples = 100
+    num_samples = 10000
 
     synthetic_data_prbs = synthetic_data.generate_synthetic_data_prbs(
-        num_samples, min_vals, max_vals, save_results=False
+        num_samples, min_vals, max_vals, graph=False, save_results=True
         )
-    print(synthetic_data_prbs)
 
     # # Get results
     # synthetic_data = generate_synthetic_data(min_val, max_val, num_samples,

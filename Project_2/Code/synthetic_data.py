@@ -4,7 +4,7 @@ import numpy as np
 import prbs
 
 
-def generate_synthetic_data_prbs(size, min_vals, max_vals,
+def generate_synthetic_data_prbs(size, min_vals, max_vals, graph=False,
                                  save_results=False):
     # Parámetros PRBS
     order = 4
@@ -18,20 +18,20 @@ def generate_synthetic_data_prbs(size, min_vals, max_vals,
                                                       max_vals[0], order,
                                                       taps, duration,
                                                       sample_rate,
-                                                      graph=True)
+                                                      graph=graph)
     hour = prbs.generate_prbs_signal(size, min_vals[1], max_vals[1], order,
                                      taps, duration, sample_rate,
-                                     graph=True)
+                                     graph=graph)
     transactions_per_day = prbs.generate_prbs_signal(size, min_vals[2],
                                                      max_vals[2], order,
                                                      taps, duration,
                                                      sample_rate,
-                                                     graph=True)
+                                                     graph=graph)
     transactions_per_month = prbs.generate_prbs_signal(size, min_vals[3],
                                                        max_vals[3], order,
                                                        taps, duration,
                                                        sample_rate,
-                                                       graph=True)
+                                                       graph=graph)
 
     universe_of_variables = fuzzy_functions.build_universe_of_variables()
     membership_functions = fuzzy_functions.build_membership_functions(universe_of_variables)
