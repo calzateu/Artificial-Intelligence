@@ -4,6 +4,7 @@ from tests import *
 from run_examples import *
 from synthetic_data import generate_synthetic_data
 import input_output as io
+import data_processing as dp
 
 
 if __name__ == '__main__':
@@ -21,3 +22,6 @@ if __name__ == '__main__':
 
     data = io.read_synthetic_data("Project_2/outputs/output_centroid.csv")
     print(data)
+
+    new_data = dp.get_subsample(data, 100)
+    print(new_data)
