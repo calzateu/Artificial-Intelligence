@@ -20,8 +20,11 @@ if __name__ == '__main__':
     # synthetic_data = generate_synthetic_data(min_val, max_val, num_samples,
     #                                          save_results=True)
 
+    # Read synthetic data
     data = io.read_synthetic_data("Project_2/outputs/output_centroid.csv")
-    print(data)
 
-    new_data = dp.get_subsample(data, 100)
-    print(new_data)
+    # Get subsample of 100 rows
+    subsample = dp.get_subsample(data, 100)
+
+    # Normalize data
+    subsample = dp.normalize(subsample)
