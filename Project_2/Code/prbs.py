@@ -19,43 +19,28 @@ class PRBSGenerator:
             sequence.append(bit)
         return sequence
 
-def generate_prbs_signal(prbs_sequence, duration, sample_rate):
+def generate_prbs_signal(size, min_value, max_value, order, taps, duration,
+                         sample_rate, graph=False):
+    # Generate PRBS
+    prbs_generator = PRBSGenerator(order, taps)
+    prbs_sequence = prbs_generator.generate_sequence(size)
+
+    # Generate Signal
     time = np.arange(0, duration, 1/sample_rate)
     prbs_signal = np.tile(prbs_sequence, int(np.ceil(duration / len(prbs_sequence))))
     prbs_signal = prbs_signal[:len(time)]
-    return prbs_signal
 
-# Parámetros PRBS
-order = 4
-taps = [3, 0]
+    # Scale Signal
+    #scaled_prbs_signal = 25 * prbs_signal + 25
+    scaled_prbs_signal = min_value + max_value * prbs_signal
 
-# Parámetros señal
-duration = 1  # segundos
-sample_rate = 1000  # Hz
+    if graph:
+        # Graph Signal
+        plt.plot(scaled_prbs_signal)
+        plt.title('PRBS')
+        plt.xlabel('Samples')
+        plt.ylabel('Amplitude')
+        plt.show()
 
-# Generar PRBS
-prbs_generator = PRBSGenerator(order, taps)
-prbs_sequence = prbs_generator.generate_sequence(100)
-
-# Generar señal persistently excitada
-prbs_signal = generate_prbs_signal(prbs_sequence, duration, sample_rate)
-
-# Visualizar la señal
-plt.plot(prbs_signal)
-plt.title('Señal Persistentemente Excitada (PRBS)')
-plt.xlabel('Muestras')
-plt.ylabel('Amplitud')
-plt.show()
-
-# Escala la señal entre 0 y 50
-scaled_prbs_signal = 25 * prbs_signal + 25
-
-# Visualiza la señal escalada
-plt.plot(scaled_prbs_signal)
-plt.title('Señal Escalada Persistentemente Excitada (PRBS)')
-plt.xlabel('Muestras')
-plt.ylabel('Amplitud')
-plt.show()
-
-print(scaled_prbs_signal)
+    return scaled_prbs_signal
 
