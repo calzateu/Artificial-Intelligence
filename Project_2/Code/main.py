@@ -5,6 +5,7 @@ from run_examples import *
 from synthetic_data import generate_synthetic_data
 import input_output as io
 import data_processing as dp
+import norms
 
 
 if __name__ == '__main__':
@@ -28,3 +29,10 @@ if __name__ == '__main__':
 
     # Normalize data
     subsample = dp.normalize(subsample)
+
+    distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
+    distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
+    distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
+
+    print(distances_euclidean)
+    print(len(distances_euclidean))
