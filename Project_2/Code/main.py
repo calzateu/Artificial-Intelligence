@@ -8,9 +8,8 @@ import synthetic_data
 
 
 if __name__ == '__main__':
-
+    # Choose if you want to generate synthetic data
     generate_synthetic_data = False
-
     if generate_synthetic_data:
         # Specify min and max values for each variable.
         min_vals = [0, 0, 0, 0]
@@ -25,12 +24,16 @@ if __name__ == '__main__':
 
         # Get results
         synthetic_data_uniform = synthetic_data.generate_synthetic_data(min_vals, max_vals, num_samples,
-                                                 save_results=False)
+                                                                        save_results=False)
 
     current_path = os.getcwd()
 
     # Read synthetic data
-    data = io.read_synthetic_data("output_centroid_.csv", current_path)
+    is_default_data = True
+    if is_default_data:
+        data = io.read_data(filename="output_centroid.csv", current_path=current_path)
+    else:
+        data = io.read_data(path_to_data="your_path/data.csv")
 
     # Get subsample of 100 rows
     subsample = dp.get_subsample(data, 100)
@@ -45,14 +48,14 @@ if __name__ == '__main__':
     print(distances_euclidean)
     print(len(distances_euclidean))
 
-    # Crear un mapa de calor con matplotlib y seaborn
+    # Heatmap of the distances matrix using Seaborn and Matplotlib.
     plt.figure(figsize=(8, 6))
     sns.heatmap(distances_euclidean, cmap="YlGnBu", fmt=".1f", linewidths=.5)
 
-    # Añadir etiquetas a los ejes
-    plt.xlabel("Índices de la matriz")
-    plt.ylabel("Índices de la matriz")
-    plt.title("Matriz de Distancias")
+    # Add labels
+    plt.xlabel("Index")
+    plt.ylabel("Index")
+    plt.title("Distances matrix")
 
-    # Mostrar la gráfica
+    # Show the plot
     plt.show()

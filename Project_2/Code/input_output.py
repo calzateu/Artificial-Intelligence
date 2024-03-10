@@ -22,20 +22,24 @@ def save_fuzzy_system_results(results, withdrawal_percentage,
     return results
 
 
-def read_synthetic_data(filename, current_path):
-    folders = current_path.split("/")
-    if folders[-1] == "Code" and folders[-2] == "Project_2":
-        path = "/".join(folders[:-1]) + "/outputs" + "/" + filename
-    elif folders[-1] == "Project_2":
-        path = "/".join(folders[:]) + "/outputs" + "/" + filename
-    elif folders[-1] == "Artificial-Intelligence":
-        path = "/".join(folders[:]) + "/Project_2" + "/outputs" + "/" + filename
-    else:
-        raise ValueError("You are not in the right folder to read the default data")
+def read_data(filename=None, current_path=None, path_to_data=None):
+    path = None
+    # Check if it is default data
+    if filename and current_path:
+        folders = current_path.split("/")
+        # The following if statement allows the user to run the script in any folder in the project 2.
+        if folders[-1] == "Code" and folders[-2] == "Project_2":
+            path = "/".join(folders[:-1]) + "/outputs" + "/" + filename
+        elif folders[-1] == "Project_2":
+            path = "/".join(folders[:]) + "/outputs" + "/" + filename
+        elif folders[-1] == "Artificial-Intelligence":
+            path = "/".join(folders[:]) + "/Project_2" + "/outputs" + "/" + filename
+        else:
+            raise ValueError("You are not in the right folder to read the default data")
+    # Check if it is custom data
+    elif path_to_data:
+        path = path_to_data
 
-    try:
-        data = pd.read_csv(path)
-        return data
-    except FileNotFoundError:
-        print("Could not find file using default data.")
-        exit(1)
+    data = pd.read_csv(path)
+
+    return data
