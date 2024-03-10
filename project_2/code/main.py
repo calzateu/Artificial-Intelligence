@@ -8,7 +8,7 @@ import synthetic_data
 
 if __name__ == '__main__':
     # Choose if you want to generate synthetic data
-    generate_synthetic_data = True
+    generate_synthetic_data = False
     if generate_synthetic_data:
         # Specify min and max values for each variable.
         min_vals = [0, 0, 0, 0]
@@ -18,10 +18,10 @@ if __name__ == '__main__':
         num_samples = 10000
 
         synthetic_data = synthetic_data.generate_synthetic_data(
-            "prbs", num_samples, min_vals, max_vals, graph=True, save_results=False
+            "prbs", num_samples, min_vals, max_vals, graph=True, save_results=True
         )
 
-    run_distances = False
+    run_distances = True
     if run_distances:
         # Read synthetic data
         is_default_data = True
