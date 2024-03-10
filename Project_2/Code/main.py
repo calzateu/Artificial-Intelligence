@@ -2,14 +2,13 @@ import data_processing as dp
 import input_output as io
 import matplotlib.pyplot as plt
 import norms
-import os
 import seaborn as sns
 import synthetic_data
 
 
 if __name__ == '__main__':
     # Choose if you want to generate synthetic data
-    generate_synthetic_data = False
+    generate_synthetic_data = True
     if generate_synthetic_data:
         # Specify min and max values for each variable.
         min_vals = [0, 0, 0, 0]
@@ -18,44 +17,40 @@ if __name__ == '__main__':
         # Generate 10000 samples
         num_samples = 10000
 
-        synthetic_data_prbs = synthetic_data.generate_synthetic_data_prbs(
-            num_samples, min_vals, max_vals, graph=False, save_results=False
-            )
+        synthetic_data = synthetic_data.generate_synthetic_data(
+            "prbs", num_samples, min_vals, max_vals, graph=True, save_results=False
+        )
 
-        # Get results
-        synthetic_data_uniform = synthetic_data.generate_synthetic_data(min_vals, max_vals, num_samples,
-                                                                        save_results=False)
+    run_distances = False
+    if run_distances:
+        # Read synthetic data
+        is_default_data = True
+        if is_default_data:
+            data = io.read_data(filename="output_centroid.csv")
+        else:
+            data = io.read_data(custom_path_to_data="your_path/data.csv")
 
-    current_path = os.getcwd()
+        # Get subsample of 100 rows
+        subsample = dp.get_subsample(data, 100)
 
-    # Read synthetic data
-    is_default_data = True
-    if is_default_data:
-        data = io.read_data(filename="output_centroid.csv", current_path=current_path)
-    else:
-        data = io.read_data(path_to_data="your_path/data.csv")
+        # Normalize data
+        subsample = dp.normalize(subsample)
 
-    # Get subsample of 100 rows
-    subsample = dp.get_subsample(data, 100)
+        distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
+        # distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
+        # distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
 
-    # Normalize data
-    subsample = dp.normalize(subsample)
+        print(distances_euclidean)
+        print(len(distances_euclidean))
 
-    distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
-    # distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
-    # distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
+        # Heatmap of the distances matrix using Seaborn and Matplotlib.
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(distances_euclidean, cmap="YlGnBu", fmt=".1f", linewidths=.5)
 
-    print(distances_euclidean)
-    print(len(distances_euclidean))
+        # Add labels
+        plt.xlabel("Index")
+        plt.ylabel("Index")
+        plt.title("Distances matrix")
 
-    # Heatmap of the distances matrix using Seaborn and Matplotlib.
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(distances_euclidean, cmap="YlGnBu", fmt=".1f", linewidths=.5)
-
-    # Add labels
-    plt.xlabel("Index")
-    plt.ylabel("Index")
-    plt.title("Distances matrix")
-
-    # Show the plot
-    plt.show()
+        # Show the plot
+        plt.show()
