@@ -1,38 +1,38 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class PRBSGenerator:
-    def __init__(self, order, taps):
-        self.order = order
-        self.taps = taps
-        self.state = 1
 
-    def shift(self):
-        feedback = sum((self.state >> tap) & 1 for tap in self.taps) % 2
-        self.state = ((self.state << 1) | feedback) & ((1 << self.order) - 1)
-        return feedback
+def prbs31(code):
+    for i in range(32):
+        next_bit = ~((code>>30) ^ (code>>27))&0x01
+        code = ((code<<1) | next_bit) & 0xFFFFFFFF
+    return code
 
-    def generate_sequence(self, length):
-        sequence = []
-        for _ in range(length):
-            bit = self.shift()
-            sequence.append(bit)
-        return sequence
 
-def generate_prbs_signal(size, min_value, max_value, order, taps, duration,
-                         sample_rate, graph=False):
+def generate_prbs31(size, graph=False):
+    seed = 1 # Initial value of seed
+    sequence = []
+
+    for _ in range(size):
+        seed = prbs31(seed)
+        sequence.append(seed & 1)
+
+    if graph:
+        plt.plot(sequence)
+        plt.title('PRBS31')
+        plt.xlabel('Samples')
+        plt.ylabel('Bit')
+        plt.show()
+
+    return sequence
+
+
+def generate_prbs_input(size, min_value, max_value, graph=False):
     # Generate PRBS
-    prbs_generator = PRBSGenerator(order, taps)
-    prbs_sequence = prbs_generator.generate_sequence(size)
+    prbs = generate_prbs31(size)
 
-    # Generate Signal
-    time = np.arange(0, duration, 1/sample_rate)
-    prbs_signal = np.tile(prbs_sequence, int(np.ceil(duration / len(prbs_sequence))))
-    prbs_signal = prbs_signal[:len(time)]
-
-    # Scale Signal
-    #scaled_prbs_signal = 25 * prbs_signal + 25
-    scaled_prbs_signal = min_value + max_value * prbs_signal
+    # Scale PRBS
+    scaled_prbs_signal = min_value + max_value * prbs
 
     if graph:
         # Graph Signal

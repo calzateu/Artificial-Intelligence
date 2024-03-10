@@ -14,20 +14,20 @@ def generate_synthetic_data_prbs(size, min_vals, max_vals, graph=False,
     duration = 1  # segundos
     sample_rate = 1000  # Hz
 
-    withdrawal_percentage = prbs.generate_prbs_signal(size, min_vals[0],
+    withdrawal_percentage = prbs.generate_prbs_input(size, min_vals[0],
                                                       max_vals[0], order,
                                                       taps, duration,
                                                       sample_rate,
                                                       graph=graph)
-    hour = prbs.generate_prbs_signal(size, min_vals[1], max_vals[1], order,
+    hour = prbs.generate_prbs_input(size, min_vals[1], max_vals[1], order,
                                      taps, duration, sample_rate,
                                      graph=graph)
-    transactions_per_day = prbs.generate_prbs_signal(size, min_vals[2],
+    transactions_per_day = prbs.generate_prbs_input(size, min_vals[2],
                                                      max_vals[2], order,
                                                      taps, duration,
                                                      sample_rate,
                                                      graph=graph)
-    transactions_per_month = prbs.generate_prbs_signal(size, min_vals[3],
+    transactions_per_month = prbs.generate_prbs_input(size, min_vals[3],
                                                        max_vals[3], order,
                                                        taps, duration,
                                                        sample_rate,

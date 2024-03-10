@@ -16,12 +16,12 @@ if __name__ == '__main__':
     # num_samples = 10000
 
     # synthetic_data_prbs = synthetic_data.generate_synthetic_data_prbs(
-    #     num_samples, min_vals, max_vals, graph=False, save_results=True
+    #     num_samples, min_vals, max_vals, graph=False, save_results=False
     #     )
 
-    # # Get results
-    # synthetic_data = generate_synthetic_data(min_val, max_val, num_samples,
-    #                                          save_results=True)
+    # Get results
+    # synthetic_data_uniform = synthetic_data.generate_synthetic_data(min_vals, max_vals, num_samples,
+    #                                          save_results=False)
 
     # Read synthetic data
     data = io.read_synthetic_data("Project_2/outputs/output_centroid.csv")

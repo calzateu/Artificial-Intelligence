@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def save_fuzzy_system_results(results, withdrawal_percentage,
                               hour, transactions_per_day,
                               transactions_per_month):
@@ -19,6 +20,7 @@ def save_fuzzy_system_results(results, withdrawal_percentage,
         print(f"Saved results for {method} in {output_filename}")
 
     return results
+
 
 def read_synthetic_data(filename):
     data = pd.read_csv(filename)
