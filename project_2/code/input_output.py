@@ -12,12 +12,12 @@ def __path_to_data() -> str:
     current_path = os.getcwd()
     folders = current_path.split("/")
     # The following if statement allows the user to run the script in any folder in the project 2.
-    if folders[-1] == "Code" and folders[-2] == "Project_2":
+    if folders[-1] == "code" and folders[-2] == "project_2":
         path = "/".join(folders[:-1]) + "/outputs" + "/"
-    elif folders[-1] == "Project_2":
+    elif folders[-1] == "project_2":
         path = "/".join(folders[:]) + "/outputs" + "/"
     elif folders[-1] == "Artificial-Intelligence":
-        path = "/".join(folders[:]) + "/Project_2" + "/outputs" + "/"
+        path = "/".join(folders[:]) + "/project_2" + "/outputs" + "/"
     else:
         raise ValueError("You are not in the right folder to read the default data")
 
