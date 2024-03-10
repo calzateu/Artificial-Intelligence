@@ -2,6 +2,7 @@ import data_processing as dp
 import input_output as io
 import matplotlib.pyplot as plt
 import norms
+import os
 import seaborn as sns
 import synthetic_data
 
@@ -26,8 +27,10 @@ if __name__ == '__main__':
         synthetic_data_uniform = synthetic_data.generate_synthetic_data(min_vals, max_vals, num_samples,
                                                  save_results=False)
 
+    current_path = os.getcwd()
+
     # Read synthetic data
-    data = io.read_synthetic_data("Project_2/outputs/output_centroid.csv")
+    data = io.read_synthetic_data("output_centroid_.csv", current_path)
 
     # Get subsample of 100 rows
     subsample = dp.get_subsample(data, 100)

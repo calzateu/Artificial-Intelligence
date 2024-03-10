@@ -22,7 +22,20 @@ def save_fuzzy_system_results(results, withdrawal_percentage,
     return results
 
 
-def read_synthetic_data(filename):
-    data = pd.read_csv(filename)
+def read_synthetic_data(filename, current_path):
+    folders = current_path.split("/")
+    if folders[-1] == "Code" and folders[-2] == "Project_2":
+        path = "/".join(folders[:-1]) + "/outputs" + "/" + filename
+    elif folders[-1] == "Project_2":
+        path = "/".join(folders[:]) + "/outputs" + "/" + filename
+    elif folders[-1] == "Artificial-Intelligence":
+        path = "/".join(folders[:]) + "/Project_2" + "/outputs" + "/" + filename
+    else:
+        raise ValueError("You are not in the right folder to read the default data")
 
-    return data
+    try:
+        data = pd.read_csv(path)
+        return data
+    except FileNotFoundError:
+        print("Could not find file using default data.")
+        exit(1)
