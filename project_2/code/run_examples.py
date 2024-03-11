@@ -2,12 +2,10 @@ import data_processing as dp
 import fuzzy_functions
 import graphics
 import input_output as io
-import matplotlib.pyplot as plt
 import norms
 import numpy as np
 from typing import Callable
 import synthetic_data as sd
-import seaborn as sns
 
 
 def run_system_all_chases(inputs: dict, t_norms: list[Callable], s_norms: list[Callable], defuzz_methods: list[str],
@@ -117,6 +115,16 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_distances: bool = False):
+    """
+    A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
+
+    Args:
+        generate_synthetic_data (bool): Whether to generate synthetic data.
+        run_distances (bool): Whether to run distance calculations.
+
+    Returns:
+        None
+    """
     # Choose if you want to generate synthetic data
     if generate_synthetic_data:
         # Generate 10000 samples
