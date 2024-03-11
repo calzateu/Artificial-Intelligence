@@ -114,12 +114,14 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
                                                     save_animation=save_animation)
 
 
-def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_distances: bool = False):
+def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
+                              run_distances: bool = False):
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
     Args:
         generate_synthetic_data (bool): Whether to generate synthetic data.
+        run_clustering (bool): Whether to run clustering.
         run_distances (bool): Whether to run distance calculations.
 
     Returns:
@@ -139,6 +141,26 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_distanc
         sd.generate_synthetic_data(
             "prbs", num_samples, min_vals, max_vals, graph=True, save_results=True
         )
+
+    if run_clustering:
+        print("Running clustering...")
+        # Read synthetic data
+        is_default_data = True
+        if is_default_data:
+            data = io.read_data(filename="output_centroid.csv")
+        else:
+            data = io.read_data(custom_path_to_data="your_path/data.csv")
+
+        # Get subsample of 100 rows
+        print("Getting subsample of 100 rows...")
+        subsample = dp.get_subsample(data, 100)
+
+        # Normalize data
+        subsample = dp.normalize(subsample)
+
+        # Run clustering
+        print("Running clustering...")
+        # clustering.run_k_means(subsample, 3, 10, 0.0001)
 
     if run_distances:
         print("Calculating distances...")
