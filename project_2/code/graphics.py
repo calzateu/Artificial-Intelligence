@@ -1,11 +1,11 @@
-
 from constants import *
 import fuzzy_functions
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from mpl_toolkits.mplot3d import Axes3D
 import os
+import seaborn as sns
+
 
 # Plot the functions
 def visualize_membership_functions(data_dict, dictionary_colors=None,
@@ -395,6 +395,29 @@ def graph_response_surface(variable_x, variable_y, animation,
 
                 anim.save(f'{directory}An - def_meth: {defuzz_method} t_norm: {t_norm.__name__} s_norm: {s_norm.__name__}-{variable_x}-{variable_y} animation - {animation}.gif', writer='pillow')
 
-
         # Show the graph
         plt.show()
+
+
+def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
+    """
+    A function to generate a heatmap of the distances matrix using Seaborn and Matplotlib.
+
+    Parameters:
+        distances (np.ndarray): The input distances matrix.
+        method_name (str): The name of the distance function (default is "euclidean").
+
+    Returns:
+        None
+    """
+    # Heatmap of the distances matrix using Seaborn and Matplotlib.
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(distances, cmap="YlGnBu", fmt=".1f", linewidths=.5)
+
+    # Add labels
+    plt.xlabel("Index")
+    plt.ylabel("Index")
+    plt.title(f"Distances matrix of {method_name} distance function")
+
+    # Show the plot
+    plt.show()

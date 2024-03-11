@@ -119,18 +119,21 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_distances: bool = False):
     # Choose if you want to generate synthetic data
     if generate_synthetic_data:
+        # Generate 10000 samples
+        num_samples = 10000
+
+        print(f"Generating {num_samples} samples of synthetic data...")
+
         # Specify min and max values for each variable.
         min_vals = [0, 0, 0, 0]
         max_vals = [1, 24, 49, 49]
 
-        # Generate 10000 samples
-        num_samples = 10000
-
-        synthetic_data = sd.generate_synthetic_data(
+        sd.generate_synthetic_data(
             "prbs", num_samples, min_vals, max_vals, graph=True, save_results=True
         )
 
     if run_distances:
+        print("Calculating distances...")
         # Read synthetic data
         is_default_data = True
         if is_default_data:
@@ -139,23 +142,16 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_distanc
             data = io.read_data(custom_path_to_data="your_path/data.csv")
 
         # Get subsample of 100 rows
+        print("Getting subsample of 100 rows...")
         subsample = dp.get_subsample(data, 100)
 
         # Normalize data
         subsample = dp.normalize(subsample)
 
         distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
-        # distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
-        # distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
+        distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
+        distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
 
-        # Heatmap of the distances matrix using Seaborn and Matplotlib.
-        plt.figure(figsize=(8, 6))
-        sns.heatmap(distances_euclidean, cmap="YlGnBu", fmt=".1f", linewidths=.5)
-
-        # Add labels
-        plt.xlabel("Index")
-        plt.ylabel("Index")
-        plt.title("Distances matrix")
-
-        # Show the plot
-        plt.show()
+        graphics.grap_distance_matrix(distances_euclidean, method_name="Euclidean")
+        graphics.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
+        graphics.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
