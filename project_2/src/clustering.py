@@ -33,10 +33,9 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
 
     stop = False
     while not stop:
+        m_last_center = m[last_center]
         for i in range(number_of_points):
-            m[i] = m[i] - m[last_center] * __calc_mountain_term(grid[i], grid[last_center], norm, beta)
-
-        print(m)
+            m[i] = m[i] - m_last_center * __calc_mountain_term(grid[i], grid[last_center], norm, beta)
 
         last_center = np.argmax(m)
 
@@ -44,10 +43,5 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
             stop = True
         else:
             cluster_centers.append(last_center)
-
-        print(cluster_centers)
-        print(len(cluster_centers))
-
-    print(len(cluster_centers))
 
     return cluster_centers

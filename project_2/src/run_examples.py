@@ -164,10 +164,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         subsample = dp.normalize(subsample)
 
         # Run clustering
-        print("Running clustering...")
         cluster_centers = clustering.mountain_clustering(subsample, norms.euclidean_norm,
-                                                         1, 1, graphics=True)
+                                                         1, 1, graphics=False)
         print(cluster_centers)
+        print(len(cluster_centers))
         # clustering.run_k_means(subsample, 3, 10, 0.0001)
 
     if run_distances:
