@@ -5,10 +5,10 @@ import random
 
 def prbs31(code: int) -> int:
     """
-    Generate a pseudo-random binary number based on the given code.
+    Generate a pseudo-random binary number based on the given src.
 
     Args:
-        code (int): The initial code used to generate the PRBS.
+        code (int): The initial src used to generate the PRBS.
 
     Returns:
         int: The pseudo-random binary number.

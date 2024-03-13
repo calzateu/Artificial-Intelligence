@@ -12,7 +12,7 @@ def __path_to_data() -> str:
     current_path = os.getcwd()
     folders = current_path.split("/")
     # The following if statement allows the user to run the script in any folder in the project 2.
-    if folders[-1] == "code" and folders[-2] == "project_2":
+    if folders[-1] == "src" and folders[-2] == "project_2":
         path = "/".join(folders[:-1]) + "/data" + "/"
     elif folders[-1] == "project_2":
         path = "/".join(folders[:]) + "/data" + "/"
