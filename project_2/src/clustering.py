@@ -5,16 +5,16 @@ import pandas as pd
 from typing import Callable
 
 
-def __calc_mountain_term(vector1, vector2, norm, constant):
+def __calc_mountain_term(vector1: np.ndarray, vector2: np.ndarray, norm: Callable, constant: float) -> float:
     """
     Calculate the mountain term between two vectors using the provided norm function and
     the provided constant (it can be sigma or beta).
 
     Parameters:
-        vector1 (numpy array): The first input vector.
-        vector2 (numpy array): The second input vector.
-        norm (function): The norm function to calculate the distance between the vectors.
-        constant (float): The constant used in the calculation.
+        vector1: The first input vector.
+        vector2 : The second input vector.
+        norm: The norm function to calculate the distance between the vectors.
+        constant: The constant used in the calculation.
 
     Returns:
         float: The calculated mountain term.
@@ -28,11 +28,11 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     Perform mountain clustering on the given data.
 
     Args:
-        data (pd.DataFrame): The input data for clustering.
-        norm (Callable): The normalization function.
-        sigma (float): The sigma parameter.
-        beta (float): The beta parameter.
-        graphics (bool, optional): Whether to display graphics. Defaults to False.
+        data: The input data for clustering.
+        norm: The normalization function.
+        sigma: The sigma parameter.
+        beta: The beta parameter.
+        graphics: Whether to display graphics. Defaults to False.
 
     Returns:
         list[int]: The indices of the cluster centers.
