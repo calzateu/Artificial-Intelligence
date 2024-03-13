@@ -146,8 +146,8 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
     if run_clustering:
         print("Running clustering...")
         # Read synthetic data
-        is_default_data = True
-        if is_default_data:
+        is_in_data_folder = True
+        if is_in_data_folder:
             # data = io.read_data(filename="output_centroid.csv")
             data = io.read_data(filename="Iris.csv")
         else:

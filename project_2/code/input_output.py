@@ -13,11 +13,11 @@ def __path_to_data() -> str:
     folders = current_path.split("/")
     # The following if statement allows the user to run the script in any folder in the project 2.
     if folders[-1] == "code" and folders[-2] == "project_2":
-        path = "/".join(folders[:-1]) + "/outputs" + "/"
+        path = "/".join(folders[:-1]) + "/data" + "/"
     elif folders[-1] == "project_2":
-        path = "/".join(folders[:]) + "/outputs" + "/"
+        path = "/".join(folders[:]) + "/data" + "/"
     elif folders[-1] == "Artificial-Intelligence":
-        path = "/".join(folders[:]) + "/project_2" + "/outputs" + "/"
+        path = "/".join(folders[:]) + "/project_2" + "/data" + "/"
     else:
         raise ValueError("You are not in the right folder to read the default data")
 
@@ -29,7 +29,7 @@ def save_fuzzy_system_results(results: list[dict], withdrawal_percentage: np.nda
                               location: str = None):
     """
     Save fuzzy system results to a CSV file, with the option to specify a location for the output files. If no location
-    is specified, the output files will be saved in the 'outputs' folder inside the project 2.
+    is specified, the output files will be saved in the 'data' folder inside the project 2.
     Parameters:
         results: a list of dictionaries containing the fuzzy system results. Each dictionary contains the results for
             each defuzzification method that was used to run the fuzzy system.
