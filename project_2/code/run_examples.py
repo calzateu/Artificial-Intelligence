@@ -1,3 +1,4 @@
+import clustering
 import data_processing as dp
 import fuzzy_functions
 import graphics
@@ -147,19 +148,26 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # Read synthetic data
         is_default_data = True
         if is_default_data:
-            data = io.read_data(filename="output_centroid.csv")
+            # data = io.read_data(filename="output_centroid.csv")
+            data = io.read_data(filename="Iris.csv")
         else:
             data = io.read_data(custom_path_to_data="your_path/data.csv")
 
+        data = data.drop(["Id", "Species"], axis=1)
+
         # Get subsample of 100 rows
-        print("Getting subsample of 100 rows...")
-        subsample = dp.get_subsample(data, 100)
+        #print("Getting subsample of 100 rows...")
+        # subsample = dp.get_subsample(data, 100)
+        subsample = data
 
         # Normalize data
         subsample = dp.normalize(subsample)
 
         # Run clustering
         print("Running clustering...")
+        cluster_centers = clustering.mountain_clustering(subsample, norms.euclidean_norm,
+                                                         1, 1, graphics=True)
+        print(cluster_centers)
         # clustering.run_k_means(subsample, 3, 10, 0.0001)
 
     if run_distances:
