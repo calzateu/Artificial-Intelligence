@@ -183,14 +183,25 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distances = dp.compute_distances(normalized_subsample, norms.euclidean_norm)
         result = dp.label_data(normalized_subsample, cluster_centers, distances)
 
+        # Run dimensionality reduction
+        if len(axes) != 2 and len(axes) != 3:
+            raise ValueError("Number of axes must be 2 or 3.")
+
         principal_df_pca = dr.pca(subsample, num_components=len(axes), axes=axes)
         principal_df_tsne = dr.tsne(subsample, num_components=len(axes), axes=axes)
         principal_df_umap = dr.umap(subsample, num_components=len(axes), axes=axes)
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
-        graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
-                                                                 principal_df_umap], cluster_centers, result['label'],
-                                                                plot_names, axes)
+        # Visualize clustering results
+        if len(axes) == 2:
+            graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
+                                                                     principal_df_umap], cluster_centers,
+                                                                    result['label'],
+                                                                    plot_names, axes)
+        else:
+            graphics.graph_clustering_results_for_multiple_datasets_3d([principal_df_pca, principal_df_tsne,
+                                                                        principal_df_umap], cluster_centers,
+                                                                       result['label'], plot_names, axes)
 
     if run_distances:
         print("Calculating distances...")

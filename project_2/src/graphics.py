@@ -503,3 +503,88 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
         plot_clusters(data, cluster_centers, labels, axes_names, plot_name, ax)
 
     plt.show()
+
+
+# TODO: it can be included in the previous function
+def plot_clusters_3d(data, cluster_centers, labels, axes, plot_name, ax):
+    """
+    Plots the clusters for a single dataset in 3D.
+
+    Parameters:
+        data: pandas DataFrame containing the data points
+        cluster_centers: list of integers representing the cluster centers
+        labels: list of integers representing the cluster labels
+        axes: list of three strings representing the x, y, and z axes
+        plot_name: name of the plot (dimensionality reduction method)
+        ax: matplotlib axis to plot on
+
+    Returns:
+        None
+    """
+    ax.set_title(plot_name)
+
+    for label in cluster_centers:
+        indexes = np.where(labels == label)[0]
+        cluster_data = data.iloc[indexes]
+        ax.scatter(cluster_data[axes[0]], cluster_data[axes[1]], cluster_data[axes[2]], label=f'Cluster {label}')
+
+    centers = data.iloc[cluster_centers]
+    ax.scatter(centers[axes[0]], centers[axes[1]], centers[axes[2]], c='black', s=200, alpha=0.5)
+
+    for i, txt in enumerate(cluster_centers):
+        ax.text(centers.iloc[i][axes[0]], centers.iloc[i][axes[1]], centers.iloc[i][axes[2]], f'{txt}', fontsize=12,
+                color='black', ha='right')
+
+    ax.set_xlabel(axes[0])
+    ax.set_ylabel(axes[1])
+    ax.set_zlabel(axes[2])
+    ax.legend()
+
+
+# TODO: it can be included in the previous function
+def graph_clustering_results_3d(data: pd.DataFrame, cluster_centers: list[int], labels: list[int], plot_name: str,
+                                axes: list[str] = None):
+    """
+    Visualizes clustering results based on the data points, cluster centers, and cluster labels in 3D.
+
+    Parameters:
+        data: pandas DataFrame containing the data points
+        cluster_centers: list of integers representing the cluster centers
+        labels: list of integers representing the cluster labels
+        plot_name: name of the plot
+        axes: list of three strings representing the x, y, and z axes
+
+    Returns:
+        This function does not return anything, it only visualizes the clustering results using matplotlib.
+    """
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    plot_clusters_3d(data, cluster_centers, labels, axes, plot_name, ax)
+    plt.show()
+
+
+# TODO: it can be included in the previous function
+def graph_clustering_results_for_multiple_datasets_3d(datas: list[pd.DataFrame], cluster_centers: list[int],
+                                                      labels: list[int], plot_names: list[str],
+                                                      axes_names: list[str] = None):
+    """
+    Visualizes clustering results based on the data points, cluster centers, and cluster labels for multiple datasets in 3D.
+
+    Parameters:
+        datas: list of pandas DataFrames containing the data points
+        cluster_centers: list of integers representing the cluster centers
+        labels: list of integers representing the cluster labels
+        plot_names: list of strings representing the names of the plots (methods of dimensionality reduction)
+        axes_names: list of three strings representing the x, y, and z axes
+
+    Returns:
+        This function does not return anything, it only visualizes the clustering results using matplotlib.
+    """
+    num_plots = len(datas)
+    fig = plt.figure(figsize=(5 * num_plots, 5))
+
+    for idx, (data, plot_name) in enumerate(zip(datas, plot_names)):
+        ax = fig.add_subplot(1, num_plots, idx + 1, projection='3d')
+        plot_clusters_3d(data, cluster_centers, labels, axes_names, plot_name, ax)
+
+    plt.show()
