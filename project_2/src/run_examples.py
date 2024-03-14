@@ -117,15 +117,14 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
-                              dataset_name: str = None, drop_axes: list = None, subsample_size: int = None,
-                              axes: list[str] = None, run_distances: bool = False):
+                              drop_axes: list = None, subsample_size: int = None, axes: list[str] = None,
+                              run_distances: bool = False):
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
     Args:
         generate_synthetic_data (bool): Whether to generate synthetic data.
         run_clustering (bool): Whether to run clustering.
-        dataset_name (str): The name of the dataset.
         drop_axes (list): The axes to drop.
         subsample_size (int): The size of the subsample.
         axes (list[str]): The axes to plot the clustering results.
@@ -174,7 +173,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         # Run clustering
         cluster_centers = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
-                                                         1, 1, graphics=False)
+                                                                 1, 1, graphics=False)
 
         print(f"Found {len(cluster_centers)} cluster centers:")
         print(cluster_centers)
