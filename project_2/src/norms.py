@@ -78,10 +78,10 @@ def mahalanobis_distance(vector1: np.ndarray, vector2: np.ndarray, covariance_ma
     """
     global inverse_covariance_matrix
 
+    # FIXME: maybe I can compute the distance in different datasets, so the stores cov matrix is
+    #  not necessary
     if inverse_covariance_matrix is None:
-        print("Inverting covariance matrix...")
         inverse_covariance_matrix = np.linalg.inv(covariance_matrix)
-    else:
-        print("Covariance matrix already inverted.")
+
     diff = vector1 - vector2
     return np.sqrt(np.dot(np.dot(diff.T, inverse_covariance_matrix), diff))
