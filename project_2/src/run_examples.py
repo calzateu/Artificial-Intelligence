@@ -117,8 +117,8 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
-                              dataset_name: str = None, drop_axes: list = None, axes: list[str] = None,
-                              run_distances: bool = False):
+                              dataset_name: str = None, drop_axes: list = None, subsample_size: int = None,
+                              axes: list[str] = None, run_distances: bool = False):
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
@@ -127,6 +127,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         run_clustering (bool): Whether to run clustering.
         dataset_name (str): The name of the dataset.
         drop_axes (list): The axes to drop.
+        subsample_size (int): The size of the subsample.
         axes (list[str]): The axes to plot the clustering results.
         run_distances (bool): Whether to run distance calculations.
 
@@ -160,16 +161,19 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         data = data.drop(drop_axes, axis=1)
 
-        # Get subsample of 100 rows
-        #print("Getting subsample of 100 rows...")
-        # subsample = dp.get_subsample(data, 100)
-        subsample = data
+        # Get subsample
+        if subsample_size:
+            subsample_size = len(data)
+            print(f"Getting subsample of {subsample_size} rows...")
+            subsample = dp.get_subsample(data, subsample_size)
+        else:
+            subsample = data
 
         # Normalize data
-        subsample = dp.normalize(subsample)
+        normalized_subsample = dp.normalize(subsample)
 
         # Run clustering
-        cluster_centers = clustering.mountain_clustering(subsample, norms.euclidean_norm,
+        cluster_centers = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
                                                          1, 1, graphics=False)
 
         print(f"Found {len(cluster_centers)} cluster centers:")
@@ -177,10 +181,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         # Label data
         #subsample = dp.label_data(subsample, cluster_centers, distances)
-        distances = dp.compute_distances(subsample, norms.euclidean_norm)
-        result = dp.label_data(subsample, cluster_centers, distances)
+        distances = dp.compute_distances(normalized_subsample, norms.euclidean_norm)
+        result = dp.label_data(normalized_subsample, cluster_centers, distances)
 
-        principal_df = dr.pca(data, num_components=len(axes), axles=axes)
+        principal_df = dr.pca(subsample, num_components=len(axes), axles=axes)
 
         graphics.graph_clustering_results(principal_df, cluster_centers, result['label'], dataset_name, axes)
 

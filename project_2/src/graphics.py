@@ -441,7 +441,8 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], lab
     """
     # Visualize clusters
     for label in cluster_centers:
-        cluster_data = data[labels == label]
+        indexes = np.where(labels == label)[0]
+        cluster_data = data.iloc[indexes]
         plt.scatter(cluster_data[axes[0]], cluster_data[axes[1]], label=f'Cluster {label}')
 
     centers = data.iloc[cluster_centers]
