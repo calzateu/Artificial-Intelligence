@@ -433,6 +433,8 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], lab
         data: pandas DataFrame containing the data points
         cluster_centers: list of integers representing the cluster centers
         labels: list of integers representing the cluster labels
+        dataset_name: name of the dataset
+        axes: list of two strings representing the x and y axes
 
     Returns:
         This function does not return anything, it only visualizes the clustering results using matplotlib.
