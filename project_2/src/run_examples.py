@@ -1,5 +1,6 @@
 import clustering
 import data_processing as dp
+import dimensionality_reduction as dr
 import fuzzy_functions
 import graphics
 import input_output as io
@@ -7,9 +8,6 @@ import norms
 import numpy as np
 from typing import Callable
 import synthetic_data as sd
-from sklearn.decomposition import PCA
-import pandas as pd
-import matplotlib.pyplot as plt
 
 
 def run_system_all_chases(inputs: dict, t_norms: list[Callable], s_norms: list[Callable], defuzz_methods: list[str],
@@ -178,10 +176,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distances = dp.compute_distances(subsample, norms.euclidean_norm)
         result = dp.label_data(subsample, cluster_centers, distances)
 
-        pca = PCA(n_components=2)
-        principal_components = pca.fit_transform(data)
-
-        principal_df = pd.DataFrame(data=principal_components, columns=['SepalLengthCm', 'SepalWidthCm'])
+        principal_df = dr.pca(data)
 
         graphics.graph_clustering_results(principal_df, cluster_centers, result['label'])
 
