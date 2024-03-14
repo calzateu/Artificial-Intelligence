@@ -424,6 +424,40 @@ def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
     plt.show()
 
 
+def plot_clusters(data, cluster_centers, labels, axes, dataset_name, ax):
+    """
+    Plots the clusters for a single dataset.
+
+    Parameters:
+        data: pandas DataFrame containing the data points
+        cluster_centers: list of integers representing the cluster centers
+        labels: list of integers representing the cluster labels
+        axes: list of two strings representing the x and y axes
+        dataset_name: name of the dataset
+        ax: matplotlib axis to plot on
+
+    Returns:
+        None
+    """
+    ax.set_title(dataset_name)
+
+    for label in cluster_centers:
+        indexes = np.where(labels == label)[0]
+        cluster_data = data.iloc[indexes]
+        ax.scatter(cluster_data[axes[0]], cluster_data[axes[1]], label=f'Cluster {label}')
+
+    centers = data.iloc[cluster_centers]
+    ax.scatter(centers[axes[0]], centers[axes[1]], c='black', s=200, alpha=0.5)
+
+    for i, txt in enumerate(cluster_centers):
+        ax.text(centers.iloc[i][axes[0]], centers.iloc[i][axes[1]], f'{txt}', fontsize=12,
+                 color='black', ha='right')
+
+    ax.set_xlabel(axes[0])
+    ax.set_ylabel(axes[1])
+    ax.legend()
+
+
 def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], labels: list[int], dataset_name: str,
                              axes: list[str] = None):
     """
@@ -439,21 +473,33 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], lab
     Returns:
         This function does not return anything, it only visualizes the clustering results using matplotlib.
     """
-    # Visualize clusters
-    for label in cluster_centers:
-        indexes = np.where(labels == label)[0]
-        cluster_data = data.iloc[indexes]
-        plt.scatter(cluster_data[axes[0]], cluster_data[axes[1]], label=f'Cluster {label}')
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plot_clusters(data, cluster_centers, labels, axes, dataset_name, ax)
+    plt.show()
 
-    centers = data.iloc[cluster_centers]
-    plt.scatter(centers[axes[0]], centers[axes[1]], c='black', s=200, alpha=0.5)
 
-    for i, txt in enumerate(cluster_centers):
-        plt.text(centers.iloc[i][axes[0]], centers.iloc[i][axes[1]], f'{txt}', fontsize=12,
-                 color='black', ha='right')
+def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cluster_centers: list[int],
+                                                   labels: list[int], dataset_name: str, axes_names: list[str] = None):
+    """
+    Visualizes clustering results based on the data points, cluster centers, and cluster labels for multiple datasets.
 
-    plt.title(dataset_name)
-    plt.xlabel(axes[0])
-    plt.ylabel(axes[1])
-    plt.legend()
+    Parameters:
+        datas: list of pandas DataFrames containing the data points
+        cluster_centers: list of integers representing the cluster centers
+        labels: list of integers representing the cluster labels
+        dataset_name: name of the dataset
+        axes_names: list of two strings representing the x and y axes
+
+    Returns:
+        This function does not return anything, it only visualizes the clustering results using matplotlib.
+    """
+    num_plots = len(datas)
+    fig, axes = plt.subplots(1, num_plots, figsize=(5 * num_plots, 5))
+
+    if not isinstance(axes, np.ndarray):
+        axes = np.array([axes])
+
+    for idx, (data, ax) in enumerate(zip(datas, axes)):
+        plot_clusters(data, cluster_centers, labels, axes_names, dataset_name, ax)
+
     plt.show()
