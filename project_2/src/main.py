@@ -9,12 +9,12 @@ if __name__ == '__main__':
     run_clustering = True
     drop_axes = ["Id", "Species"]
     sub_sample_size = None
-    # axes = ["SepalLengthCm", "SepalWidthCm"]
-    axes = ["SepalLengthCm", "SepalWidthCm", "PetalLengthCm"]
+    num_components = 3
 
     # Choose if you want to run distance calculations and plot graphs.
     run_distances = False
 
     run_examples.run_unsupervised_pipeline(generate_synthetic_data=generate_synthetic_data,
                                            run_clustering=run_clustering, subsample_size=sub_sample_size,
-                                           drop_axes=drop_axes, axes=axes, run_distances=run_distances)
+                                           num_components=num_components, drop_axes=drop_axes,
+                                           run_distances=run_distances)

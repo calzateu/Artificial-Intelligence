@@ -117,7 +117,7 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
-                              drop_axes: list = None, subsample_size: int = None, axes: list[str] = None,
+                              drop_axes: list = None, subsample_size: int = None, num_components: int = 2,
                               run_distances: bool = False):
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
@@ -127,7 +127,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         run_clustering (bool): Whether to run clustering.
         drop_axes (list): The axes to drop.
         subsample_size (int): The size of the subsample.
-        axes (list[str]): The axes to plot the clustering results.
+        num_components (int): The number of components.
         run_distances (bool): Whether to run distance calculations.
 
     Returns:
@@ -186,15 +186,19 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         # Run dimensionality reduction
         print("Running dimensionality reduction...")
-        if len(axes) != 2 and len(axes) != 3:
+        if num_components == 2:
+            axes = ["PC1", "PC2"]
+        elif num_components == 3:
+            axes = ["PC1", "PC2", "PC3"]
+        else:
             raise ValueError("Number of axes must be 2 or 3.")
 
         principal_df_pca, transformed_cen_points_pca = dr.pca(normalized_subsample, center_points,
-                                                              num_components=len(axes), axes=axes)
+                                                              num_components=num_components, axes=axes)
         principal_df_tsne, transformed_cen_points_tsne = dr.tsne(normalized_subsample, center_points,
-                                                                 num_components=len(axes), axes=axes)
+                                                                 num_components=num_components, axes=axes)
         principal_df_umap, transformed_cen_points_umap = dr.umap(normalized_subsample, center_points,
-                                                                 num_components=len(axes), axes=axes)
+                                                                 num_components=num_components, axes=axes)
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
         # Visualize clustering results
