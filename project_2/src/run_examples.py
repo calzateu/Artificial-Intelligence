@@ -180,13 +180,14 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         print(cluster_centers)
 
         # Label data
-        #subsample = dp.label_data(subsample, cluster_centers, distances)
         distances = dp.compute_distances(normalized_subsample, norms.euclidean_norm)
         result = dp.label_data(normalized_subsample, cluster_centers, distances)
 
-        principal_df = dr.pca(subsample, num_components=len(axes), axles=axes)
-
+        principal_df = dr.pca(subsample, num_components=len(axes), axes=axes)
         graphics.graph_clustering_results(principal_df, cluster_centers, result['label'], dataset_name, axes)
+
+        principal_df_tsne = dr.tsne(subsample, num_components=len(axes), axes=axes)
+        graphics.graph_clustering_results(principal_df_tsne, cluster_centers, result['label'], dataset_name, axes)
 
     if run_distances:
         print("Calculating distances...")
