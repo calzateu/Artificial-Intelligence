@@ -1,6 +1,9 @@
 import numpy as np
 
 
+inverse_covariance_matrix = None
+
+
 def euclidean_norm(vector1: np.ndarray, vector2: np.ndarray) -> float:
     """
     Calculate the Euclidean norm between two input vectors.
@@ -59,3 +62,26 @@ def p_norm(vector1: np.ndarray, vector2: np.ndarray, p: int) -> float:
         The p-norm distance between vector1 and vector2.
     """
     return np.power(np.sum(np.power(np.abs(vector1 - vector2), p)), 1/p)
+
+
+def mahalanobis_distance(vector1: np.ndarray, vector2: np.ndarray, covariance_matrix: np.ndarray) -> float:
+    """
+    Calculate the Mahalanobis distance between two input vectors.
+
+    Args:
+        vector1 (np.ndarray): The first input vector.
+        vector2 (np.ndarray): The second input vector.
+        covariance_matrix (np.ndarray): The covariance matrix of the input vectors.
+
+    Returns:
+        float: The Mahalanobis distance between the two input vectors.
+    """
+    global inverse_covariance_matrix
+
+    if inverse_covariance_matrix is None:
+        print("Inverting covariance matrix...")
+        inverse_covariance_matrix = np.linalg.inv(covariance_matrix)
+    else:
+        print("Covariance matrix already inverted.")
+    diff = vector1 - vector2
+    return np.sqrt(np.dot(np.dot(diff.T, inverse_covariance_matrix), diff))
