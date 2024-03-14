@@ -186,10 +186,11 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         principal_df_pca = dr.pca(subsample, num_components=len(axes), axes=axes)
         principal_df_tsne = dr.tsne(subsample, num_components=len(axes), axes=axes)
         principal_df_umap = dr.umap(subsample, num_components=len(axes), axes=axes)
+        plot_names = ["PCA", "t-SNE", "UMAP"]
 
         graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
                                                                  principal_df_umap], cluster_centers, result['label'],
-                                                                dataset_name, axes)
+                                                                plot_names, axes)
 
     if run_distances:
         print("Calculating distances...")

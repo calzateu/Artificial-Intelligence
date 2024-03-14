@@ -424,7 +424,7 @@ def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
     plt.show()
 
 
-def plot_clusters(data, cluster_centers, labels, axes, dataset_name, ax):
+def plot_clusters(data, cluster_centers, labels, axes, plot_name, ax):
     """
     Plots the clusters for a single dataset.
 
@@ -433,13 +433,13 @@ def plot_clusters(data, cluster_centers, labels, axes, dataset_name, ax):
         cluster_centers: list of integers representing the cluster centers
         labels: list of integers representing the cluster labels
         axes: list of two strings representing the x and y axes
-        dataset_name: name of the dataset
+        plot_name: name of the plot (dimensionality reduction method)
         ax: matplotlib axis to plot on
 
     Returns:
         None
     """
-    ax.set_title(dataset_name)
+    ax.set_title(plot_name)
 
     for label in cluster_centers:
         indexes = np.where(labels == label)[0]
@@ -458,7 +458,7 @@ def plot_clusters(data, cluster_centers, labels, axes, dataset_name, ax):
     ax.legend()
 
 
-def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], labels: list[int], dataset_name: str,
+def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], labels: list[int], plot_name: str,
                              axes: list[str] = None):
     """
     Visualizes clustering results based on the data points, cluster centers, and cluster labels.
@@ -467,19 +467,19 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], lab
         data: pandas DataFrame containing the data points
         cluster_centers: list of integers representing the cluster centers
         labels: list of integers representing the cluster labels
-        dataset_name: name of the dataset
+        plot_name: name of the plot
         axes: list of two strings representing the x and y axes
 
     Returns:
         This function does not return anything, it only visualizes the clustering results using matplotlib.
     """
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_clusters(data, cluster_centers, labels, axes, dataset_name, ax)
+    plot_clusters(data, cluster_centers, labels, axes, plot_name, ax)
     plt.show()
 
 
 def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cluster_centers: list[int],
-                                                   labels: list[int], dataset_name: str, axes_names: list[str] = None):
+                                                   labels: list[int], plot_names: list[str], axes_names: list[str] = None):
     """
     Visualizes clustering results based on the data points, cluster centers, and cluster labels for multiple datasets.
 
@@ -487,7 +487,7 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
         datas: list of pandas DataFrames containing the data points
         cluster_centers: list of integers representing the cluster centers
         labels: list of integers representing the cluster labels
-        dataset_name: name of the dataset
+        plot_names: list of strings representing the names of the plots (methods of dimensionality reduction)
         axes_names: list of two strings representing the x and y axes
 
     Returns:
@@ -499,7 +499,7 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
     if not isinstance(axes, np.ndarray):
         axes = np.array([axes])
 
-    for idx, (data, ax) in enumerate(zip(datas, axes)):
-        plot_clusters(data, cluster_centers, labels, axes_names, dataset_name, ax)
+    for idx, (data, ax, plot_name) in enumerate(zip(datas, axes, plot_names)):
+        plot_clusters(data, cluster_centers, labels, axes_names, plot_name, ax)
 
     plt.show()
