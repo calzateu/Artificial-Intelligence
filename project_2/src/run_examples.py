@@ -7,6 +7,9 @@ import norms
 import numpy as np
 from typing import Callable
 import synthetic_data as sd
+from sklearn.decomposition import PCA
+import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def run_system_all_chases(inputs: dict, t_norms: list[Callable], s_norms: list[Callable], defuzz_methods: list[str],
@@ -168,7 +171,36 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
                                                          1, 1, graphics=False)
         print(cluster_centers)
         print(len(cluster_centers))
-        # clustering.run_k_means(subsample, 3, 10, 0.0001)
+
+        # Label data
+        #subsample = dp.label_data(subsample, cluster_centers, distances)
+        distances = dp.compute_distances(subsample, norms.euclidean_norm)
+        result = dp.label_data(subsample, cluster_centers, distances)
+        print(result)
+
+        pca = PCA(n_components=2)
+        principal_components = pca.fit_transform(data)
+        print(principal_components)
+
+        principal_df = pd.DataFrame(data=principal_components, columns=['SepalLengthCm', 'SepalWidthCm'])
+
+        # Visualize clusters
+        for label in cluster_centers:
+            cluster_data = principal_df[result['label'] == label]
+            plt.scatter(cluster_data['SepalLengthCm'], cluster_data['SepalWidthCm'], label=f'Cluster {label}')
+
+        centers = principal_df.iloc[cluster_centers]
+        plt.scatter(centers['SepalLengthCm'], centers['SepalWidthCm'], c='black', s=200, alpha=0.5)
+
+        for i, txt in enumerate(cluster_centers):
+            plt.text(centers.iloc[i]['SepalLengthCm'], centers.iloc[i]['SepalWidthCm'], f'{txt}', fontsize=12,
+                     color='black', ha='right')
+
+        plt.title("Iris Clusters")
+        plt.xlabel("Sepal Length (Cm)")
+        plt.ylabel("Sepal Width (Cm)")
+        plt.legend()
+        plt.show()
 
     if run_distances:
         print("Calculating distances...")

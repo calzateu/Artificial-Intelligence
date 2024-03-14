@@ -45,3 +45,28 @@ def compute_distances(subsample: pd.DataFrame, norm, *args) -> np.array:
             distances[i, j] = norm(subsample.iloc[i], subsample.iloc[j], *args)
 
     return distances
+
+
+def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: np.ndarray) -> pd.DataFrame:
+    """
+    Assign labels to data based on the distance matrix and cluster centers.
+    Args:
+        data: The data to be labeled.
+        cluster_centers: The cluster centers.
+        distance_matrix: The distance matrix.
+    Returns:
+        pd.DataFrame: The labeled data.
+    """
+    labels = [0]*len(data)
+    for i in range(len(data)):
+        min_distance = np.inf
+        min_center = -1
+        for j in cluster_centers:
+            if distance_matrix[i, j] < min_distance:
+                min_distance = distance_matrix[i, j]
+                min_center = j
+        labels[i] = min_center
+
+    data["label"] = labels
+
+    return data
