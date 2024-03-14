@@ -231,7 +231,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
         distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
         distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
+        covariance_matrix = np.cov(subsample, rowvar=False)
+        distances_mahalanobis = dp.compute_distances(subsample, norms.mahalanobis_distance, covariance_matrix)
 
         graphics.grap_distance_matrix(distances_euclidean, method_name="Euclidean")
         graphics.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
         graphics.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
+        graphics.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis")
