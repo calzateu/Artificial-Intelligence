@@ -424,7 +424,8 @@ def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
     plt.show()
 
 
-def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], labels: list[int]):
+def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], labels: list[int], dataset_name: str,
+                             axes: list[str] = None):
     """
     Visualizes clustering results based on the data points, cluster centers, and cluster labels.
 
@@ -439,17 +440,17 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], lab
     # Visualize clusters
     for label in cluster_centers:
         cluster_data = data[labels == label]
-        plt.scatter(cluster_data['SepalLengthCm'], cluster_data['SepalWidthCm'], label=f'Cluster {label}')
+        plt.scatter(cluster_data[axes[0]], cluster_data[axes[1]], label=f'Cluster {label}')
 
     centers = data.iloc[cluster_centers]
-    plt.scatter(centers['SepalLengthCm'], centers['SepalWidthCm'], c='black', s=200, alpha=0.5)
+    plt.scatter(centers[axes[0]], centers[axes[1]], c='black', s=200, alpha=0.5)
 
     for i, txt in enumerate(cluster_centers):
-        plt.text(centers.iloc[i]['SepalLengthCm'], centers.iloc[i]['SepalWidthCm'], f'{txt}', fontsize=12,
+        plt.text(centers.iloc[i][axes[0]], centers.iloc[i][axes[1]], f'{txt}', fontsize=12,
                  color='black', ha='right')
 
-    plt.title("Iris Clusters")
-    plt.xlabel("Sepal Length (Cm)")
-    plt.ylabel("Sepal Width (Cm)")
+    plt.title(dataset_name)
+    plt.xlabel(axes[0])
+    plt.ylabel(axes[1])
     plt.legend()
     plt.show()

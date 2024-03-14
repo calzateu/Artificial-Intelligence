@@ -117,6 +117,7 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
+                              dataset_name: str = None, drop_axes: list = None, axes: list[str] = None,
                               run_distances: bool = False):
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
@@ -124,6 +125,9 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
     Args:
         generate_synthetic_data (bool): Whether to generate synthetic data.
         run_clustering (bool): Whether to run clustering.
+        dataset_name (str): The name of the dataset.
+        drop_axes (list): The axes to drop.
+        axes (list[str]): The axes to plot the clustering results.
         run_distances (bool): Whether to run distance calculations.
 
     Returns:
@@ -154,7 +158,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         else:
             data = io.read_data(custom_path_to_data="your_path/data.csv")
 
-        data = data.drop(["Id", "Species"], axis=1)
+        data = data.drop(drop_axes, axis=1)
 
         # Get subsample of 100 rows
         #print("Getting subsample of 100 rows...")
@@ -176,9 +180,9 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distances = dp.compute_distances(subsample, norms.euclidean_norm)
         result = dp.label_data(subsample, cluster_centers, distances)
 
-        principal_df = dr.pca(data)
+        principal_df = dr.pca(data, num_components=len(axes), axles=axes)
 
-        graphics.graph_clustering_results(principal_df, cluster_centers, result['label'])
+        graphics.graph_clustering_results(principal_df, cluster_centers, result['label'], dataset_name, axes)
 
     if run_distances:
         print("Calculating distances...")
