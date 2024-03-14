@@ -189,6 +189,9 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         principal_df_tsne = dr.tsne(subsample, num_components=len(axes), axes=axes)
         graphics.graph_clustering_results(principal_df_tsne, cluster_centers, result['label'], dataset_name, axes)
 
+        principal_df_umap = dr.umap(subsample, num_components=len(axes), axes=axes)
+        graphics.graph_clustering_results(principal_df_umap, cluster_centers, result['label'], dataset_name, axes)
+
     if run_distances:
         print("Calculating distances...")
         # Read synthetic data
