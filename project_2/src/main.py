@@ -9,6 +9,7 @@ if __name__ == '__main__':
     run_clustering = True
     drop_axes = ["Id", "Species"]
     sub_sample_size = None
+    # axes = ["SepalLengthCm", "SepalWidthCm"]
     axes = ["SepalLengthCm", "SepalWidthCm", "PetalLengthCm"]
 
     # Choose if you want to run distance calculations and plot graphs.

@@ -23,7 +23,7 @@ def __calc_mountain_term(vector1: np.ndarray, vector2: np.ndarray, norm: Callabl
 
 
 def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: float,
-                        graphics: bool = False) -> list[int]:
+                        graphics: bool = False) -> tuple[list[int], np.ndarray]:
     """
     Perform mountain clustering on the given data.
 
@@ -36,6 +36,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
 
     Returns:
         list[int]: The indices of the cluster centers.
+        np.ndarray: The cluster centers (data points).
     """
     # First step: create grid (mesh)
     array = np.linspace(0, 1, 3)
@@ -70,4 +71,4 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
         else:
             cluster_centers.append(last_center)
 
-    return cluster_centers
+    return cluster_centers, grid[cluster_centers]

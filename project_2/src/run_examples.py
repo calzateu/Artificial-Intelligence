@@ -172,35 +172,45 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         normalized_subsample = dp.normalize(subsample)
 
         # Run clustering
-        cluster_centers = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
-                                                                 1, 1, graphics=False)
+        cluster_centers, center_points = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
+                                                                        1, 1, graphics=False)
 
         print(f"Found {len(cluster_centers)} cluster centers:")
         print(cluster_centers)
 
         # Label data
-        distances = dp.compute_distances(normalized_subsample, norms.euclidean_norm)
-        result = dp.label_data(normalized_subsample, cluster_centers, distances)
+        print("Labeling data...")
+
+        distances = dp.compute_distances((normalized_subsample, center_points), norms.euclidean_norm)
+        result = dp.label_data(normalized_subsample, cluster_centers, center_points, distances)
 
         # Run dimensionality reduction
         if len(axes) != 2 and len(axes) != 3:
             raise ValueError("Number of axes must be 2 or 3.")
 
-        principal_df_pca = dr.pca(subsample, num_components=len(axes), axes=axes)
-        principal_df_tsne = dr.tsne(subsample, num_components=len(axes), axes=axes)
-        principal_df_umap = dr.umap(subsample, num_components=len(axes), axes=axes)
+        principal_df_pca, transformed_cen_points_pca = dr.pca(normalized_subsample, center_points,
+                                                              num_components=len(axes), axes=axes)
+        principal_df_tsne, transformed_cen_points_tsne = dr.tsne(normalized_subsample, center_points,
+                                                                 num_components=len(axes), axes=axes)
+        principal_df_umap, transformed_cen_points_umap = dr.umap(normalized_subsample, center_points,
+                                                                 num_components=len(axes), axes=axes)
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
         # Visualize clustering results
         if len(axes) == 2:
             graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
                                                                      principal_df_umap], cluster_centers,
-                                                                    result['label'],
-                                                                    plot_names, axes)
+                                                                    [transformed_cen_points_pca,
+                                                                     transformed_cen_points_tsne,
+                                                                     transformed_cen_points_umap],
+                                                                    result['label'], plot_names, axes)
         else:
             graphics.graph_clustering_results_for_multiple_datasets_3d([principal_df_pca, principal_df_tsne,
                                                                         principal_df_umap], cluster_centers,
-                                                                       result['label'], plot_names, axes)
+                                                                       [transformed_cen_points_pca,
+                                                                        transformed_cen_points_tsne,
+                                                                        transformed_cen_points_umap], result['label'],
+                                                                       plot_names, axes)
 
     if run_distances:
         print("Calculating distances...")
