@@ -185,6 +185,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         result = dp.label_data(normalized_subsample, cluster_centers, center_points, distances)
 
         # Run dimensionality reduction
+        print("Running dimensionality reduction...")
         if len(axes) != 2 and len(axes) != 3:
             raise ValueError("Number of axes must be 2 or 3.")
 
@@ -197,6 +198,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
         # Visualize clustering results
+        print("Visualizing clustering results...")
         if len(axes) == 2:
             graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
                                                                      principal_df_umap], cluster_centers,
