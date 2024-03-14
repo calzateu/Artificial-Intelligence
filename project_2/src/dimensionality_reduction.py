@@ -21,11 +21,13 @@ def pca(data: pd.DataFrame, center_points: np.ndarray = None, num_components: in
         transformed center points will be None.
     """
     pca_model = PCA(n_components=num_components)
-    principal_components = pca_model.fit_transform(data.drop(columns=['label'], axis=1))
+    temp_data = data.drop(columns=['label'], axis=1)
+    principal_components = pca_model.fit_transform(temp_data)
 
     center_points_transformed = None
     if center_points is not None:
-        center_points_transformed = pca_model.transform(center_points)
+        center_points_df = pd.DataFrame(data=center_points, columns=temp_data.columns)
+        center_points_transformed = pca_model.transform(center_points_df)
 
     principal_df = pd.DataFrame(data=principal_components, columns=axes)
 
