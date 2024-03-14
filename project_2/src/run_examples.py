@@ -169,38 +169,21 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # Run clustering
         cluster_centers = clustering.mountain_clustering(subsample, norms.euclidean_norm,
                                                          1, 1, graphics=False)
+
+        print(f"Found {len(cluster_centers)} cluster centers:")
         print(cluster_centers)
-        print(len(cluster_centers))
 
         # Label data
         #subsample = dp.label_data(subsample, cluster_centers, distances)
         distances = dp.compute_distances(subsample, norms.euclidean_norm)
         result = dp.label_data(subsample, cluster_centers, distances)
-        print(result)
 
         pca = PCA(n_components=2)
         principal_components = pca.fit_transform(data)
-        print(principal_components)
 
         principal_df = pd.DataFrame(data=principal_components, columns=['SepalLengthCm', 'SepalWidthCm'])
 
-        # Visualize clusters
-        for label in cluster_centers:
-            cluster_data = principal_df[result['label'] == label]
-            plt.scatter(cluster_data['SepalLengthCm'], cluster_data['SepalWidthCm'], label=f'Cluster {label}')
-
-        centers = principal_df.iloc[cluster_centers]
-        plt.scatter(centers['SepalLengthCm'], centers['SepalWidthCm'], c='black', s=200, alpha=0.5)
-
-        for i, txt in enumerate(cluster_centers):
-            plt.text(centers.iloc[i]['SepalLengthCm'], centers.iloc[i]['SepalWidthCm'], f'{txt}', fontsize=12,
-                     color='black', ha='right')
-
-        plt.title("Iris Clusters")
-        plt.xlabel("Sepal Length (Cm)")
-        plt.ylabel("Sepal Width (Cm)")
-        plt.legend()
-        plt.show()
+        graphics.graph_clustering_results(principal_df, cluster_centers, result['label'])
 
     if run_distances:
         print("Calculating distances...")

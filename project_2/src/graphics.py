@@ -3,6 +3,7 @@ import fuzzy_functions
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import pandas as pd
 import os
 import seaborn as sns
 
@@ -420,4 +421,35 @@ def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
     plt.title(f"Distances matrix of {method_name} distance function")
 
     # Show the plot
+    plt.show()
+
+
+def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], labels: list[int]):
+    """
+    Visualizes clustering results based on the data points, cluster centers, and cluster labels.
+
+    Parameters:
+        data: pandas DataFrame containing the data points
+        cluster_centers: list of integers representing the cluster centers
+        labels: list of integers representing the cluster labels
+
+    Returns:
+        This function does not return anything, it only visualizes the clustering results using matplotlib.
+    """
+    # Visualize clusters
+    for label in cluster_centers:
+        cluster_data = data[labels == label]
+        plt.scatter(cluster_data['SepalLengthCm'], cluster_data['SepalWidthCm'], label=f'Cluster {label}')
+
+    centers = data.iloc[cluster_centers]
+    plt.scatter(centers['SepalLengthCm'], centers['SepalWidthCm'], c='black', s=200, alpha=0.5)
+
+    for i, txt in enumerate(cluster_centers):
+        plt.text(centers.iloc[i]['SepalLengthCm'], centers.iloc[i]['SepalWidthCm'], f'{txt}', fontsize=12,
+                 color='black', ha='right')
+
+    plt.title("Iris Clusters")
+    plt.xlabel("Sepal Length (Cm)")
+    plt.ylabel("Sepal Width (Cm)")
+    plt.legend()
     plt.show()
