@@ -433,7 +433,7 @@ def plot_clusters(data, cluster_centers, center_points, labels, axes, plot_name,
         cluster_centers: list of integers representing the cluster centers
         center_points: list of values representing the center points
         labels: list of integers representing the cluster labels
-        axes: list of two strings representing the x and y axes
+        axes: list of strings representing axes
         plot_name: name of the plot (dimensionality reduction method)
         ax: matplotlib axis to plot on
 
@@ -442,16 +442,26 @@ def plot_clusters(data, cluster_centers, center_points, labels, axes, plot_name,
     """
     ax.set_title(plot_name)
 
+    # Go through the data and select the points that belong to each cluster and plot them
+    # with a different color
     for label in cluster_centers:
+        # Select data points that have this label
         indexes = np.where(labels == label)[0]
+        # Extract the data points of this cluster
         cluster_data = data.iloc[indexes]
+        # Plot the data points. For that, we need to transpose the data points to have the columns on the rows
+        # and unroll them with the * operator. With this, we can plot the data points independently of the
+        # dimensionality (2D or 3D)
         ax.scatter(*cluster_data[axes].values.T, label=f'Cluster {label}')
 
+    # Plot the cluster centers with a different color
     ax.scatter(*center_points.T, c='black', s=200, alpha=0.5)
 
+    # Add labels to the cluster centers
     for i, txt in enumerate(cluster_centers):
         ax.text(*center_points[i], f'{txt}', fontsize=12, color='black', ha='right')
 
+    # Set axes labels
     ax.set_xlabel(axes[0])
     ax.set_ylabel(axes[1])
     if len(axes) == 3:
@@ -476,6 +486,7 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], cen
         This function does not return anything, it only visualizes the clustering results using matplotlib.
     """
     fig, ax = plt.subplots(figsize=(8, 6))
+    # Create a 3D axis if there are three axes
     if len(axes) == 3:
         ax = fig.add_subplot(111, projection='3d')
     plot_clusters(data, cluster_centers, center_points, labels, axes, plot_name, ax)
@@ -495,7 +506,7 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
                                   for a specific dimensionality reduction method
         labels: list of integers representing the cluster labels
         plot_names: list of strings representing the names of the plots (methods of dimensionality reduction)
-        axes_names: list of two strings representing the x and y axes
+        axes_names: list of strings representing the axes
 
     Returns:
         This function does not return anything, it only visualizes the clustering results using matplotlib.
@@ -504,10 +515,13 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
     fig = plt.figure(figsize=(5 * num_plots, 5))
 
     for idx, (data, plot_name, center_points) in enumerate(zip(datas, plot_names, center_points_by_method)):
+        # If there are 3 axes, use 3D projection
         if len(axes_names) == 3:
             ax = fig.add_subplot(1, num_plots, idx + 1, projection='3d')
+        # Otherwise, use the default projection (2D)
         else:
             ax = fig.add_subplot(1, num_plots, idx + 1)
+
         plot_clusters(data, cluster_centers, center_points, labels, axes_names, plot_name, ax)
 
     plt.show()

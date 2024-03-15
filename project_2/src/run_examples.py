@@ -133,7 +133,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
     Returns:
         None
     """
-    # Choose if you want to generate synthetic data
+    # Choose if you want to generate synthetic data.
     if generate_synthetic_data:
         # Generate 10000 samples
         num_samples = 10000
@@ -168,10 +168,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         else:
             subsample = data
 
-        # Normalize data
+        # Normalize data with min-max normalization.
         normalized_subsample = dp.normalize(subsample)
 
-        # Run clustering
+        # Run mountain clustering. Select graphics=False to not display the mountain function.
         cluster_centers, center_points = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
                                                                         1, 1, graphics=False)
 
@@ -180,12 +180,12 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         # Label data
         print("Labeling data...")
-
         distances = dp.compute_distances((normalized_subsample, center_points), norms.euclidean_norm)
         result = dp.label_data(normalized_subsample, cluster_centers, center_points, distances)
 
         # Run dimensionality reduction
         print("Running dimensionality reduction...")
+        # Check if number of axes is 2 or 3.
         if num_components == 2:
             axes = ["PC1", "PC2"]
         elif num_components == 3:
@@ -193,6 +193,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         else:
             raise ValueError("Number of axes must be 2 or 3.")
 
+        # Run dimensionality reduction for PCA, t-SNE, and UMAP.
         principal_df_pca, transformed_cen_points_pca = dr.pca(normalized_subsample, center_points,
                                                               num_components=num_components, axes=axes)
         principal_df_tsne, transformed_cen_points_tsne = dr.tsne(normalized_subsample, center_points,
@@ -201,7 +202,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
                                                                  num_components=num_components, axes=axes)
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
-        # Visualize clustering results
+        # Visualize clustering results.
         print("Visualizing clustering results...")
         graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
                                                                  principal_df_umap], cluster_centers,
