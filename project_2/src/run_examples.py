@@ -203,20 +203,12 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         # Visualize clustering results
         print("Visualizing clustering results...")
-        if len(axes) == 2:
-            graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
-                                                                     principal_df_umap], cluster_centers,
-                                                                    [transformed_cen_points_pca,
-                                                                     transformed_cen_points_tsne,
-                                                                     transformed_cen_points_umap],
-                                                                    result['label'], plot_names, axes)
-        else:
-            graphics.graph_clustering_results_for_multiple_datasets_3d([principal_df_pca, principal_df_tsne,
-                                                                        principal_df_umap], cluster_centers,
-                                                                       [transformed_cen_points_pca,
-                                                                        transformed_cen_points_tsne,
-                                                                        transformed_cen_points_umap], result['label'],
-                                                                       plot_names, axes)
+        graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
+                                                                 principal_df_umap], cluster_centers,
+                                                                [transformed_cen_points_pca,
+                                                                 transformed_cen_points_tsne,
+                                                                 transformed_cen_points_umap],
+                                                                result['label'], plot_names, axes)
 
     if run_distances:
         print("Calculating distances...")
