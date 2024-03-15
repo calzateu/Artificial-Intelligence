@@ -47,6 +47,8 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     number_of_points = sum(grid.shape[:-1])
     m = np.zeros(number_of_points)
 
+    # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+    # Calculate the mountain term for each point
     for i in range(number_of_points):
         m[i] = sum([__calc_mountain_term(grid[i], data.iloc[j], norm, sigma) for j in range(len(data))])
 
@@ -55,18 +57,21 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
         plt.plot(m, 'o')
         plt.show()
 
-    # Third step: select cluster centers
+    # Third step: select cluster centers as the point with the highest mountain term.
     last_center = np.argmax(m)
     cluster_centers = [last_center]
 
     stop = False
     while not stop:
         m_last_center = m[last_center]
+        # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+        # Subtracting scaled Gaussian function centered at the last cluster center
         for i in range(number_of_points):
             m[i] = m[i] - m_last_center * __calc_mountain_term(grid[i], grid[last_center], norm, beta)
 
         last_center = np.argmax(m)
 
+        # If the last center is the same as the previous one, stop.
         if last_center == cluster_centers[-1]:
             stop = True
         else:
@@ -113,6 +118,8 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
     number_of_points = len(data)
     d = np.zeros(number_of_points)
 
+    # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+    # Calculate the density measure for each point
     for i in range(number_of_points):
         d[i] = sum([__calc_density_measure(data.iloc[i], data.iloc[j], norm, r_a) for j in range(len(data))])
 
@@ -121,18 +128,21 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
         plt.plot(d, 'o')
         plt.show()
 
-    # Second step: select cluster centers
+    # Second step: select cluster centers as the point with the highest density measure.
     last_center = np.argmax(d)
     cluster_centers = [last_center]
 
     stop = False
     while not stop:
         d_last_center = d[last_center]
+        # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+        # Subtracting scaled Gaussian function centered at the last cluster center
         for i in range(number_of_points):
             d[i] = d[i] - d_last_center * __calc_density_measure(data.iloc[i], data.iloc[last_center], norm, r_b)
 
         last_center = np.argmax(d)
 
+        # If the last center is the same as the previous one, stop.
         if last_center == cluster_centers[-1]:
             stop = True
         else:

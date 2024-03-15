@@ -119,6 +119,17 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, num_components: int = 2,
                               graphics: bool = False, *args):
+    """
+    Run a clustering pipeline using the specified method on the provided data.
+    Args:
+        clustering_method (Callable): The clustering method to use.
+        data (pd.DataFrame): The input data for clustering.
+        num_components (int): The number of components for dimensionality reduction (default 2).
+        graphics (bool): Flag indicating whether to visualize the clustering results (default False).
+        *args: Additional arguments for the clustering method.
+    Returns:
+        tuple: A tuple containing the cluster centers and center points.
+    """
     print(f"Running clustering pipeline with {clustering_method.__name__}...")
     # Run clustering methods.
     cluster_centers, center_points = clustering_method(data, norms.euclidean_norm, *args, graphics=graphics)
