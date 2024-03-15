@@ -2,8 +2,9 @@ import clustering
 import data_processing as dp
 import dimensionality_reduction as dr
 import fuzzy_functions
-import graphics
+import graphics as gr
 import input_output as io
+import pandas as pd
 import norms
 import numpy as np
 from typing import Callable
@@ -74,10 +75,10 @@ def call_graph_response_surface(inputs: dict, variable_x: str, variable_y: str, 
     if animation:
         variables[animation] = universe_of_variables[animation]
 
-    graphics.graph_response_surface(variable_x, variable_y, animation, variables, data_dict, universe_of_variables,
-                                    membership_functions, color_map, defuzz_methods=defuzz_methods, t_norm=t_norm,
-                                    s_norm=s_norm, animation_velocity=animation_velocity, save_graphs=save_graphs,
-                                    save_animation=save_animation)
+    gr.graph_response_surface(variable_x, variable_y, animation, variables, data_dict, universe_of_variables,
+                              membership_functions, color_map, defuzz_methods=defuzz_methods, t_norm=t_norm,
+                              s_norm=s_norm, animation_velocity=animation_velocity, save_graphs=save_graphs,
+                              save_animation=save_animation)
 
 
 def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], y_variables: list[str],
@@ -114,6 +115,51 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
                                                     animation_velocity=animation_velocity,
                                                     save_graphs=save_graphs,
                                                     save_animation=save_animation)
+
+
+def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, num_components: int = 2,
+                              graphics: bool = False, *args):
+    print(f"Running clustering pipeline with {clustering_method.__name__}...")
+    # Run clustering methods.
+    cluster_centers, center_points = clustering_method(data, norms.euclidean_norm, *args, graphics=graphics)
+
+    print(f"Found {len(cluster_centers)} cluster centers:")
+    print(cluster_centers)
+
+    # Label data
+    print("Labeling data...")
+    distances = dp.compute_distances((data, center_points), norms.euclidean_norm)
+    result = dp.label_data(data, cluster_centers, center_points, distances)
+
+    # Run dimensionality reduction
+    print("Running dimensionality reduction...")
+    # Check if number of axes is 2 or 3.
+    if num_components == 2:
+        axes = ["PC1", "PC2"]
+    elif num_components == 3:
+        axes = ["PC1", "PC2", "PC3"]
+    else:
+        raise ValueError("Number of axes must be 2 or 3.")
+
+    # Run dimensionality reduction for PCA, t-SNE, and UMAP.
+    principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
+        "pca", data, center_points, num_components=num_components, axes=axes
+    )
+    principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
+        "tsne", data, center_points, num_components=num_components, axes=axes
+    )
+    principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
+        "umap", data, center_points, num_components=num_components, axes=axes
+    )
+    plot_names = ["PCA", "t-SNE", "UMAP"]
+
+    # Visualize clustering results.
+    print("Visualizing clustering results...")
+    gr.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
+                                                       principal_df_umap], cluster_centers,
+                                                      [transformed_cen_points_pca,
+                                                       transformed_cen_points_tsne, transformed_cen_points_umap],
+                                                      result['label'], plot_names, axes)
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
@@ -171,90 +217,12 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # Normalize data with min-max normalization.
         normalized_subsample = dp.normalize(subsample)
 
-        # # Run mountain clustering. Select graphics=False to not display the mountain function.
-        # cluster_centers, center_points = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
-        #                                                                 1, 1, graphics=False)
-        #
-        # print(f"Found {len(cluster_centers)} cluster centers:")
-        # print(cluster_centers)
-        #
-        # # Label data
-        # print("Labeling data...")
-        # distances = dp.compute_distances((normalized_subsample, center_points), norms.euclidean_norm)
-        # result = dp.label_data(normalized_subsample, cluster_centers, center_points, distances)
-        #
-        # # Run dimensionality reduction
-        # print("Running dimensionality reduction...")
-        # # Check if number of axes is 2 or 3.
-        # if num_components == 2:
-        #     axes = ["PC1", "PC2"]
-        # elif num_components == 3:
-        #     axes = ["PC1", "PC2", "PC3"]
-        # else:
-        #     raise ValueError("Number of axes must be 2 or 3.")
-        #
-        # # Run dimensionality reduction for PCA, t-SNE, and UMAP.
-        # principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
-        #     "pca", normalized_subsample, center_points, num_components=num_components, axes=axes
-        # )
-        # principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
-        #     "tsne", normalized_subsample, center_points, num_components=num_components, axes=axes
-        # )
-        # principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
-        #     "umap", normalized_subsample, center_points, num_components=num_components, axes=axes
-        # )
-        # plot_names = ["PCA", "t-SNE", "UMAP"]
-        #
-        # # Visualize clustering results.
-        # print("Visualizing clustering results...")
-        # graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
-        #                                                          principal_df_umap], cluster_centers,
-        #                                                         [transformed_cen_points_pca,
-        #                                                          transformed_cen_points_tsne,
-        #                                                          transformed_cen_points_umap],
-        #                                                         result['label'], plot_names, axes)
-
-        # Run subtractive clustering
-        cluster_centers_sub, center_points_sub = clustering.subtractive_clustering(
-            normalized_subsample, norms.euclidean_norm, 10, 2.5, graphics=False
-        )
-        print(f"Found {len(cluster_centers_sub)} cluster centers:")
-        print(cluster_centers_sub)
-
-        # Label data
-        print("Labeling data...")
-        distances_sub = dp.compute_distances((normalized_subsample, center_points_sub), norms.euclidean_norm)
-        result_sub = dp.label_data(normalized_subsample, cluster_centers_sub, center_points_sub, distances_sub)
-
-        # Run dimensionality reduction
-        print("Running dimensionality reduction...")
-        # Check if number of axes is 2 or 3.
-        if num_components == 2:
-            axes = ["PC1", "PC2"]
-        elif num_components == 3:
-            axes = ["PC1", "PC2", "PC3"]
-        else:
-            raise ValueError("Number of axes must be 2 or 3.")
-
-        principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
-            "pca", normalized_subsample, center_points_sub, num_components=num_components, axes=axes
-        )
-        principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
-            "tsne", normalized_subsample, center_points_sub, num_components=num_components, axes=axes
-        )
-        principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
-            "umap", normalized_subsample, center_points_sub, num_components=num_components, axes=axes
-        )
-        plot_names = ["PCA", "t-SNE", "UMAP"]
-
-        # Visualize clustering results.
-        print("Visualizing clustering results...")
-        graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
-                                                                 principal_df_umap], cluster_centers_sub,
-                                                                [transformed_cen_points_pca,
-                                                                 transformed_cen_points_tsne,
-                                                                 transformed_cen_points_umap],
-                                                                result_sub['label'], plot_names, axes)
+        # Run mountain clustering. Select graphics=False to not display the mountain function.
+        __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
+                                  False, 1, 1)
+        # Run subtractive clustering. Select graphics=False to not display the density function.
+        __run_clustering_pipeline(clustering.subtractive_clustering, normalized_subsample, num_components,
+                                  False, 10, 2.5)
 
     if run_distances:
         print("Calculating distances...")
@@ -278,7 +246,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         covariance_matrix = np.cov(subsample, rowvar=False)
         distances_mahalanobis = dp.compute_distances(subsample, norms.mahalanobis_distance, covariance_matrix)
 
-        graphics.grap_distance_matrix(distances_euclidean, method_name="Euclidean")
-        graphics.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
-        graphics.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
-        graphics.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis")
+        gr.grap_distance_matrix(distances_euclidean, method_name="Euclidean")
+        gr.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
+        gr.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
+        gr.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis")

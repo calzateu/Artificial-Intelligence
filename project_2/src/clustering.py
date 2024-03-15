@@ -101,8 +101,8 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
     Args:
         data: The input data for clustering.
         norm: The normalization function.
-        sigma: The sigma parameter.
-        beta: The beta parameter.
+        r_a: The r_a parameter.
+        r_b: The r_b parameter.
         graphics: Whether to display graphics. Defaults to False.
 
     Returns:
