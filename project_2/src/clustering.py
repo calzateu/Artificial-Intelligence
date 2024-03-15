@@ -168,7 +168,9 @@ def __calc_cost(data: np.ndarray, clusters: np.ndarray, cluster_centers: np.ndar
     # TODO: don't call the norm function here, but pass it as a parameter or the matrix
     cost = 0
     for i in clusters:
+        # Get the cluster points
         for j in data[clusters == i]:
+            # Add the distance of each point to the cluster center
             cost += norm(cluster_centers[i], j)
 
     return cost
@@ -186,6 +188,7 @@ def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, norm: Callabl
     Returns:
         An array containing the cluster assignments for each data point.
     """
+    # Go through each data point and assign it to the closest cluster.
     clusters = np.argmin(
         np.array([[norm(x_k, center) for center in cluster_centers] for x_k in data]),
         axis=1
@@ -214,10 +217,11 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     """
     # Create a copy of the data
     data_copy = data.copy()
+    # Convert the data to a numpy array, so we can perform operations easily.
     data_copy = data_copy.values
 
     # Step 1: Initialize cluster centers
-    # If no initial cluster centers are provided, randomly select k points as cluster centers
+    # If no initial cluster centers are provided, randomly select k points as cluster centers.
     if initial_cluster_points is None:
         index = np.random.choice(data_copy.shape[0], k, replace=False)
         center_points = data_copy[index]
@@ -245,6 +249,7 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
 
         cont += 1
 
+    # As we have new points, we assign them new indexes.
     nodes_index = [len(data) + i for i in range(len(center_points))]
 
     return nodes_index, center_points
