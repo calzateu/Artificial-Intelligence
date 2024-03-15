@@ -194,12 +194,15 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
             raise ValueError("Number of axes must be 2 or 3.")
 
         # Run dimensionality reduction for PCA, t-SNE, and UMAP.
-        principal_df_pca, transformed_cen_points_pca = dr.pca(normalized_subsample, center_points,
-                                                              num_components=num_components, axes=axes)
-        principal_df_tsne, transformed_cen_points_tsne = dr.tsne(normalized_subsample, center_points,
-                                                                 num_components=num_components, axes=axes)
-        principal_df_umap, transformed_cen_points_umap = dr.umap(normalized_subsample, center_points,
-                                                                 num_components=num_components, axes=axes)
+        principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
+            "pca", normalized_subsample, center_points, num_components=num_components, axes=axes
+        )
+        principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
+            "tsne", normalized_subsample, center_points, num_components=num_components, axes=axes
+        )
+        principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
+            "umap", normalized_subsample, center_points, num_components=num_components, axes=axes
+        )
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
         # Visualize clustering results.
