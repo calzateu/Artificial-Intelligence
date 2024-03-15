@@ -1,5 +1,7 @@
+import data_processing as dp
 import matplotlib.pyplot as plt
 import mesh
+import norms
 import numpy as np
 import pandas as pd
 from typing import Callable
@@ -151,7 +153,47 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
     return cluster_centers, data.iloc[cluster_centers]
 
 
-def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_centers: list[int] = None,
+def __calc_cost(data: np.ndarray, clusters: np.ndarray, cluster_centers: np.ndarray, norm: Callable) -> float:
+    """
+    Calculate the cost of the clustering.
+
+    Args:
+        data: The input data.
+        cluster_centers: The cluster centers.
+        norm: The normalization function.
+
+    Returns:
+        float: The cost of the clustering.
+    """
+    # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+    cost = 0
+    for i in clusters:
+        for j in data[clusters == i]:
+            cost += norm(cluster_centers[i], j)
+
+    return cost
+
+
+def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, norm: Callable) -> np.ndarray:
+    """
+    Assigns data points to clusters based on the distance from cluster centers.
+
+    Args:
+        data: A numpy array representing the data points to be assigned to clusters.
+        cluster_centers: A numpy array representing the cluster centers.
+        norm: A function to calculate the distance between data points and cluster centers.
+
+    Returns:
+        An array containing the cluster assignments for each data point.
+    """
+    clusters = np.argmin(
+        np.array([[norm(x_k, center) for center in cluster_centers] for x_k in data]),
+        axis=1
+    )
+    return clusters
+
+
+def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_points: np.ndarray = None,
                        graphics: bool = False) -> tuple[list[int], np.ndarray]:
     """
     Perform k-means clustering on the given data.
@@ -159,7 +201,7 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     Args:
         data: The input data for clustering.
         norm: The normalization function.
-        initial_cluster_centers: The initial cluster centers. Defaults to None. You can use subtractive_clustering to
+        initial_cluster_points: The initial cluster centers. Defaults to None. You can use subtractive_clustering to
                                   obtain an initial cluster center. NOTE: If you use mountain clustering, then it
                                   can be bad, because that will be the points of the grid, not the points of
                                   the data.
@@ -172,22 +214,37 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     """
     # Create a copy of the data
     data_copy = data.copy()
+    data_copy = data_copy.values
 
     # Step 1: Initialize cluster centers
     # If no initial cluster centers are provided, randomly select k points as cluster centers
-    if initial_cluster_centers is None:
-        cluster_centers = np.random.choice(len(data), k, replace=False)
+    if initial_cluster_points is None:
+        index = np.random.choice(data_copy.shape[0], k, replace=False)
+        center_points = data_copy[index]
     else:
-        cluster_centers = initial_cluster_centers
+        center_points = initial_cluster_points
 
-    stop = False
-    while not stop:
+    cost = np.inf
+    cont = 0
+    while True:
+        print(f"Iteration: {cont}, Cost: {cost}")
         # Step 2: determine the membership matrix U. It is assigning each point to the closest cluster center.
-        for i in range(len(data)):
-            # TODO: don't call the norm function here, but pass it as a parameter or the matrix
-            data_copy.loc[i, 'cluster'] = np.argmin(
-                [norm(data_copy.iloc[i], data_copy.iloc[j]) for j in cluster_centers]
-            )
+        clusters = assign_clusters(data_copy, center_points, norm)
+
+        # Step 3: compute the cost function
+        new_cost = __calc_cost(data_copy, clusters, center_points, norm)
+        # Check if the cost has decreased
+        if cost - new_cost <= 0:
+            break
+        else:
+            cost = new_cost
 
         # Update the cluster centers
-        cluster_centers = data_copy.groupby('cluster').mean().reset_index().iloc[:, 1:].values
+        for i in range(len(center_points)):
+            center_points[i] = data_copy[clusters == i].mean()
+
+        cont += 1
+
+    nodes_index = [len(data) + i for i in range(len(center_points))]
+
+    return nodes_index, center_points

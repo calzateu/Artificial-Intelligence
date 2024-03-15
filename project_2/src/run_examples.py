@@ -232,8 +232,11 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
         #                          False, 1, 1)
         # Run subtractive clustering. Select graphics=False to not display the density function.
-        __run_clustering_pipeline(clustering.subtractive_clustering, normalized_subsample, num_components,
-                                  False, 0.5, 0.8)
+        # __run_clustering_pipeline(clustering.subtractive_clustering, normalized_subsample, num_components,
+        #                           False, 0.5, 0.8)
+
+        __run_clustering_pipeline(clustering.k_means_clustering, normalized_subsample, num_components,
+                                  False, 4, None)
 
     if run_distances:
         print("Calculating distances...")
