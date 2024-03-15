@@ -21,15 +21,18 @@ def reduce_dimensionality(method: Literal['pca', 'tsne', 'umap'], data: pd.DataF
     Returns:
         A tuple containing the reduced DataFrame and the transformed center points (if provided).
     """
-    # Store the original number of rows in data
+    # Store the original number of rows in data.
     original_rows = data.shape[0]
+    # Drop the label column
     temp_data = data.drop(columns=['label'], axis=1)
 
+    # Add the center points to the data if they are provided.
     if center_points is not None:
         # Add the center points to the data DataFrame
         center_points_df = pd.DataFrame(data=center_points, columns=temp_data.columns)
         temp_data = pd.concat([temp_data, center_points_df], ignore_index=True)
 
+    # Fit the dimensionality reduction model and transform the data.
     if method == 'pca':
         pca_model = PCA(n_components=num_components)
         principal_components = pca_model.fit_transform(temp_data)
@@ -44,9 +47,9 @@ def reduce_dimensionality(method: Literal['pca', 'tsne', 'umap'], data: pd.DataF
 
     # Get the values of the added center points
     if center_points is not None:
-        # Center points are located after the original rows
+        # Center points are located after the original rows.
         center_points_transformed = principal_components[original_rows:]
-        # Remove the center points from the array of principal components
+        # Remove the center points from the array of principal components.
         principal_components = principal_components[:original_rows]
     else:
         center_points_transformed = None
