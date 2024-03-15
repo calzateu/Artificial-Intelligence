@@ -28,7 +28,8 @@ def normalize(data: pd.DataFrame) -> pd.DataFrame:
     return (data - data.min()) / (data.max() - data.min())
 
 
-def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray], norm, *args) -> np.array:
+def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray] | tuple[pd.DataFrame, pd.DataFrame],
+                      norm, *args) -> np.array:
     """
     Compute distances between elements in a subsample using a given norm function and optional additional arguments.
     Args:
@@ -39,12 +40,20 @@ def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray], norm
     Returns:
         np.array: An array of distances between elements in the subsample.
     """
+    distances = None
     if isinstance(data, tuple):
-        # If `data` is a tuple, calculate distances between the DataFrame and the numpy array
-        distances = np.zeros((len(data[0]), len(data[1])))
-        for i in range(len(data[0])):
-            for j in range(len(data[1])):
-                distances[i, j] = norm(data[0].iloc[i], data[1][j], *args)
+        if isinstance(data[1], np.ndarray):
+            # If `data` is a tuple, calculate distances between the DataFrame and the numpy array
+            distances = np.zeros((len(data[0]), len(data[1])))
+            for i in range(len(data[0])):
+                for j in range(len(data[1])):
+                    distances[i, j] = norm(data[0].iloc[i], data[1][j], *args)
+        elif isinstance(data[1], pd.DataFrame):
+            # If `data` is a tuple, calculate distances between the DataFrame and the DataFrame
+            distances = np.zeros((len(data[0]), len(data[1])))
+            for i in range(len(data[0])):
+                for j in range(len(data[1])):
+                    distances[i, j] = norm(data[0].iloc[i], data[1].iloc[j], *args)
     elif isinstance(data, pd.DataFrame):
         # If `data` is a single DataFrame, calculate distances between all points in the DataFrame
         distances = np.zeros((len(data), len(data)))

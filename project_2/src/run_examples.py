@@ -171,17 +171,60 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # Normalize data with min-max normalization.
         normalized_subsample = dp.normalize(subsample)
 
-        # Run mountain clustering. Select graphics=False to not display the mountain function.
-        cluster_centers, center_points = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
-                                                                        1, 1, graphics=False)
+        # # Run mountain clustering. Select graphics=False to not display the mountain function.
+        # cluster_centers, center_points = clustering.mountain_clustering(normalized_subsample, norms.euclidean_norm,
+        #                                                                 1, 1, graphics=False)
+        #
+        # print(f"Found {len(cluster_centers)} cluster centers:")
+        # print(cluster_centers)
+        #
+        # # Label data
+        # print("Labeling data...")
+        # distances = dp.compute_distances((normalized_subsample, center_points), norms.euclidean_norm)
+        # result = dp.label_data(normalized_subsample, cluster_centers, center_points, distances)
+        #
+        # # Run dimensionality reduction
+        # print("Running dimensionality reduction...")
+        # # Check if number of axes is 2 or 3.
+        # if num_components == 2:
+        #     axes = ["PC1", "PC2"]
+        # elif num_components == 3:
+        #     axes = ["PC1", "PC2", "PC3"]
+        # else:
+        #     raise ValueError("Number of axes must be 2 or 3.")
+        #
+        # # Run dimensionality reduction for PCA, t-SNE, and UMAP.
+        # principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
+        #     "pca", normalized_subsample, center_points, num_components=num_components, axes=axes
+        # )
+        # principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
+        #     "tsne", normalized_subsample, center_points, num_components=num_components, axes=axes
+        # )
+        # principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
+        #     "umap", normalized_subsample, center_points, num_components=num_components, axes=axes
+        # )
+        # plot_names = ["PCA", "t-SNE", "UMAP"]
+        #
+        # # Visualize clustering results.
+        # print("Visualizing clustering results...")
+        # graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
+        #                                                          principal_df_umap], cluster_centers,
+        #                                                         [transformed_cen_points_pca,
+        #                                                          transformed_cen_points_tsne,
+        #                                                          transformed_cen_points_umap],
+        #                                                         result['label'], plot_names, axes)
 
-        print(f"Found {len(cluster_centers)} cluster centers:")
-        print(cluster_centers)
+        # Run subtractive clustering
+        cluster_centers_sub, center_points_sub = clustering.subtractive_clustering(
+            normalized_subsample, norms.euclidean_norm, 10, 2.5, graphics=False
+        )
+        print(f"Found {len(cluster_centers_sub)} cluster centers:")
+        print(cluster_centers_sub)
 
         # Label data
         print("Labeling data...")
-        distances = dp.compute_distances((normalized_subsample, center_points), norms.euclidean_norm)
-        result = dp.label_data(normalized_subsample, cluster_centers, center_points, distances)
+        distances_sub = dp.compute_distances((normalized_subsample, center_points_sub), norms.euclidean_norm)
+        result_sub = dp.label_data(normalized_subsample, cluster_centers_sub, center_points_sub, distances_sub)
 
         # Run dimensionality reduction
         print("Running dimensionality reduction...")
@@ -193,26 +236,25 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         else:
             raise ValueError("Number of axes must be 2 or 3.")
 
-        # Run dimensionality reduction for PCA, t-SNE, and UMAP.
         principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
-            "pca", normalized_subsample, center_points, num_components=num_components, axes=axes
+            "pca", normalized_subsample, center_points_sub, num_components=num_components, axes=axes
         )
         principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
-            "tsne", normalized_subsample, center_points, num_components=num_components, axes=axes
+            "tsne", normalized_subsample, center_points_sub, num_components=num_components, axes=axes
         )
         principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
-            "umap", normalized_subsample, center_points, num_components=num_components, axes=axes
+            "umap", normalized_subsample, center_points_sub, num_components=num_components, axes=axes
         )
         plot_names = ["PCA", "t-SNE", "UMAP"]
 
         # Visualize clustering results.
         print("Visualizing clustering results...")
         graphics.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
-                                                                 principal_df_umap], cluster_centers,
+                                                                 principal_df_umap], cluster_centers_sub,
                                                                 [transformed_cen_points_pca,
                                                                  transformed_cen_points_tsne,
                                                                  transformed_cen_points_umap],
-                                                                result['label'], plot_names, axes)
+                                                                result_sub['label'], plot_names, axes)
 
     if run_distances:
         print("Calculating distances...")
