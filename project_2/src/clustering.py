@@ -121,7 +121,7 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
     # TODO: don't call the norm function here, but pass it as a parameter or the matrix
     # Calculate the density measure for each point
     for i in range(number_of_points):
-        d[i] = sum([__calc_density_measure(data.iloc[i], data.iloc[j], norm, r_a) for j in range(len(data))])
+        d[i] = sum([__calc_density_measure(data.iloc[i], data.iloc[j], norm, r_a) for j in range(number_of_points)])
 
     if graphics:
         plt.figure()
@@ -143,9 +143,51 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
         last_center = np.argmax(d)
 
         # If the last center is the same as the previous one, stop.
-        if last_center == cluster_centers[-1]:
+        if d[last_center] <= 0 or last_center == cluster_centers[-1]:
             stop = True
         else:
             cluster_centers.append(last_center)
 
     return cluster_centers, data.iloc[cluster_centers]
+
+
+def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_centers: list[int] = None,
+                       graphics: bool = False) -> tuple[list[int], np.ndarray]:
+    """
+    Perform k-means clustering on the given data.
+
+    Args:
+        data: The input data for clustering.
+        norm: The normalization function.
+        initial_cluster_centers: The initial cluster centers. Defaults to None. You can use subtractive_clustering to
+                                  obtain an initial cluster center. NOTE: If you use mountain clustering, then it
+                                  can be bad, because that will be the points of the grid, not the points of
+                                  the data.
+        k: The number of cluster centers.
+        graphics: Whether to display graphics. Defaults to False.
+
+    Returns:
+        list[int]: The indices of the cluster centers.
+        np.ndarray: The cluster centers (data points).
+    """
+    # Create a copy of the data
+    data_copy = data.copy()
+
+    # Step 1: Initialize cluster centers
+    # If no initial cluster centers are provided, randomly select k points as cluster centers
+    if initial_cluster_centers is None:
+        cluster_centers = np.random.choice(len(data), k, replace=False)
+    else:
+        cluster_centers = initial_cluster_centers
+
+    stop = False
+    while not stop:
+        # Step 2: determine the membership matrix U. It is assigning each point to the closest cluster center.
+        for i in range(len(data)):
+            # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+            data_copy.loc[i, 'cluster'] = np.argmin(
+                [norm(data_copy.iloc[i], data_copy.iloc[j]) for j in cluster_centers]
+            )
+
+        # Update the cluster centers
+        cluster_centers = data_copy.groupby('cluster').mean().reset_index().iloc[:, 1:].values

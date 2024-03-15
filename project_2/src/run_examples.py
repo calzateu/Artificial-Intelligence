@@ -229,11 +229,11 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         normalized_subsample = dp.normalize(subsample)
 
         # Run mountain clustering. Select graphics=False to not display the mountain function.
-        __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
-                                  False, 1, 1)
+        # __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
+        #                          False, 1, 1)
         # Run subtractive clustering. Select graphics=False to not display the density function.
         __run_clustering_pipeline(clustering.subtractive_clustering, normalized_subsample, num_components,
-                                  False, 10, 2.5)
+                                  False, 0.5, 0.8)
 
     if run_distances:
         print("Calculating distances...")
