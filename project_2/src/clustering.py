@@ -7,26 +7,24 @@ import pandas as pd
 from typing import Callable
 
 
-def __calc_mountain_term(vector1: np.ndarray, vector2: np.ndarray, norm: Callable, constant: float) -> float:
+def __calc_mountain_term(norm_value: float, constant: float) -> float:
     """
     Calculate the mountain term between two vectors using the provided norm function and
     the provided constant (it can be sigma or beta).
 
     Parameters:
-        vector1: The first input vector.
-        vector2 : The second input vector.
-        norm: The norm function to calculate the distance between the vectors.
+        norm_value: The norm value between two vectors.
         constant: The constant used in the calculation.
 
     Returns:
         float: The calculated mountain term.
     """
     # TODO: don't call the norm function here, but pass it as a parameter or the matrix
-    return np.exp(-((norm(vector1, vector2))**2)/(2*constant**2))
+    return np.exp(-(norm_value**2)/(2*constant**2))
 
 
 def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: float,
-                        graphics: bool = False) -> tuple[list[int], np.ndarray]:
+                        graphics: bool = False) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform mountain clustering on the given data.
 
@@ -40,19 +38,21 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     Returns:
         list[int]: The indices of the cluster centers.
         np.ndarray: The cluster centers (data points).
+        np.ndarray: The distance matrix between the data points and the cluster centers.
     """
     # First step: create grid (mesh)
     array = np.linspace(0, 1, 3)
     grid = mesh.create_mesh(array, 4)
 
+    distances_data_grid = dp.compute_distances((data, grid), norms.euclidean_norm)
+
     # Second step: construct mountain function
     number_of_points = sum(grid.shape[:-1])
     m = np.zeros(number_of_points)
 
-    # TODO: don't call the norm function here, but pass it as a parameter or the matrix
     # Calculate the mountain term for each point
     for i in range(number_of_points):
-        m[i] = sum([__calc_mountain_term(grid[i], data.iloc[j], norm, sigma) for j in range(len(data))])
+        m[i] = sum([__calc_mountain_term(distances_data_grid[j, i], sigma) for j in range(len(data))])
 
     if graphics:
         plt.figure()
@@ -63,13 +63,14 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     last_center = np.argmax(m)
     cluster_centers = [last_center]
 
+    distances_grid_grid = dp.compute_distances((grid, grid), norms.euclidean_norm)
+
     stop = False
     while not stop:
         m_last_center = m[last_center]
-        # TODO: don't call the norm function here, but pass it as a parameter or the matrix
         # Subtracting scaled Gaussian function centered at the last cluster center
         for i in range(number_of_points):
-            m[i] = m[i] - m_last_center * __calc_mountain_term(grid[i], grid[last_center], norm, beta)
+            m[i] = m[i] - m_last_center * __calc_mountain_term(distances_grid_grid[i, last_center], beta)
 
         last_center = np.argmax(m)
 
@@ -79,7 +80,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
         else:
             cluster_centers.append(last_center)
 
-    return cluster_centers, grid[cluster_centers]
+    return cluster_centers, grid[cluster_centers], distances_data_grid[:, cluster_centers]
 
 
 def __calc_density_measure(vector1: np.ndarray, vector2: np.ndarray, norm: Callable, constant: float) -> float:

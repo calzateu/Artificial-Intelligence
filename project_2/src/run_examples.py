@@ -132,15 +132,16 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
     """
     print(f"Running clustering pipeline with {clustering_method.__name__}...")
     # Run clustering methods.
-    cluster_centers, center_points = clustering_method(data, norms.euclidean_norm, *args, graphics=graphics)
+    cluster_centers, center_points, distances_data_to_centers = clustering_method(
+        data, norms.euclidean_norm, *args, graphics=graphics
+    )
 
     print(f"Found {len(cluster_centers)} cluster centers:")
     print(cluster_centers)
 
     # Label data
     print("Labeling data...")
-    distances = dp.compute_distances((data, center_points), norms.euclidean_norm)
-    result = dp.label_data(data, cluster_centers, center_points, distances)
+    result = dp.label_data(data, cluster_centers, center_points, distances_data_to_centers)
 
     # Run dimensionality reduction
     print("Running dimensionality reduction...")
@@ -229,14 +230,14 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         normalized_subsample = dp.normalize(subsample)
 
         # Run mountain clustering. Select graphics=False to not display the mountain function.
-        # __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
-        #                          False, 1, 1)
+        __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
+                                 False, 1, 1)
         # Run subtractive clustering. Select graphics=False to not display the density function.
         # __run_clustering_pipeline(clustering.subtractive_clustering, normalized_subsample, num_components,
         #                           False, 0.5, 0.8)
 
-        __run_clustering_pipeline(clustering.k_means_clustering, normalized_subsample, num_components,
-                                  False, 4, None)
+        # __run_clustering_pipeline(clustering.k_means_clustering, normalized_subsample, num_components,
+        #                           False, 4, None)
 
     if run_distances:
         print("Calculating distances...")
