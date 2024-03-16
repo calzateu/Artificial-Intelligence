@@ -144,7 +144,7 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
 
     # Label data
     print("Labeling data...")
-    result = dp.label_data(data, cluster_centers, center_points, distances_data_to_centers)
+    result = dp.label_data(data, cluster_centers, distances_data_to_centers)
 
     # Run dimensionality reduction
     print("Running dimensionality reduction...")
@@ -253,13 +253,13 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
 
         # Run mountain clustering. Select graphics=False to not display the mountain function.
-        __run_clustering_pipeline(clustering_method=clustering.mountain_clustering, data=normalized_subsample,
-                                  num_components=num_components, distance_matrix=distance_matrix, graphics=False,
-                                  **kwargs)
-        # Run subtractive clustering. Select graphics=False to not display the density function.
-        # __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
+        # __run_clustering_pipeline(clustering_method=clustering.mountain_clustering, data=normalized_subsample,
         #                           num_components=num_components, distance_matrix=distance_matrix, graphics=False,
         #                           **kwargs)
+        # Run subtractive clustering. Select graphics=False to not display the density function.
+        __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
+                                  num_components=num_components, distance_matrix=distance_matrix, graphics=False,
+                                  **kwargs)
 
         # __run_clustering_pipeline(clustering.k_means_clustering, normalized_subsample, num_components,
         #                           False, 4, None)

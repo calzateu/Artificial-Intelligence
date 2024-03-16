@@ -82,48 +82,45 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     return cluster_centers, grid[cluster_centers], distances_data_grid[:, cluster_centers]
 
 
-def __calc_density_measure(vector1: np.ndarray, vector2: np.ndarray, norm: Callable, constant: float) -> float:
+def __calc_density_measure(norm_value: float, constant: float) -> float:
     """
     Calculate the density measure between two vectors using the provided norm function and
     the provided constant (it can be r_a or r_b).
 
     Parameters:
-        vector1: The first input vector.
-        vector2 : The second input vector.
-        norm: The norm function to calculate the distance between the vectors.
+        norm_value: The norm value between two vectors.
         constant: The constant used in the calculation.
 
     Returns:
         float: The calculated density measure.
     """
-    # TODO: don't call the norm function here, but pass it as a parameter or the matrix
-    return np.exp(-((norm(vector1, vector2))**2)/((constant/2)**2))
+    return np.exp(-(norm_value**2)/((constant/2)**2))
 
 
-def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: float,
-                           graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray]:
+def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.float64], r_a: float, r_b: float,
+                           graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform subtractive clustering on the given data.
 
     Args:
         data: The input data for clustering.
-        norm: The normalization function.
+        distance_matrix: The distance matrix between the data points.
         r_a: The r_a parameter.
         r_b: The r_b parameter.
         graphics: Whether to display graphics. Defaults to False.
 
     Returns:
-        list[int]: The indices of the cluster centers.
-        np.ndarray: The cluster centers (data points).
+        The indices of the cluster centers.
+        The cluster centers (data points).
+        The distance matrix between the data points and the cluster centers.
     """
     # First step: construct density function.
     number_of_points = len(data)
     d = np.zeros(number_of_points)
 
-    # TODO: don't call the norm function here, but pass it as a parameter or the matrix
     # Calculate the density measure for each point
     for i in range(number_of_points):
-        d[i] = sum([__calc_density_measure(data.iloc[i], data.iloc[j], norm, r_a) for j in range(number_of_points)])
+        d[i] = sum([__calc_density_measure(distance_matrix[i, j], r_a) for j in range(number_of_points)])
 
     if graphics:
         plt.figure()
@@ -137,10 +134,9 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
     stop = False
     while not stop:
         d_last_center = d[last_center]
-        # TODO: don't call the norm function here, but pass it as a parameter or the matrix
-        # Subtracting scaled Gaussian function centered at the last cluster center
+        # Subtract scaled Gaussian function centered at the last cluster center.
         for i in range(number_of_points):
-            d[i] = d[i] - d_last_center * __calc_density_measure(data.iloc[i], data.iloc[last_center], norm, r_b)
+            d[i] = d[i] - d_last_center * __calc_density_measure(distance_matrix[i, last_center], r_b)
 
         last_center = np.argmax(d)
 
@@ -150,7 +146,7 @@ def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: 
         else:
             cluster_centers.append(last_center)
 
-    return cluster_centers, data.iloc[cluster_centers]
+    return cluster_centers, data.iloc[cluster_centers], distance_matrix[:, cluster_centers]
 
 
 def __calc_cost(data: np.ndarray, clusters: np.ndarray, cluster_centers: np.ndarray, norm: Callable) -> float:

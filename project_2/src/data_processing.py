@@ -43,6 +43,7 @@ def __build_distance_matrix(data1: np.ndarray, data2: np.ndarray, norm: Callable
     len_data1 = len(data1)
     len_data2 = len(data2)
     distance_matrix = np.zeros((len_data1, len_data2))
+    # TODO: vectorize this
     for i in range(len_data1):
         if len_data1 == len_data2:
             for j in range(i, len_data2):
@@ -98,18 +99,17 @@ def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray] | tup
     return __build_distance_matrix(data1, data2, norm, **kwargs)
 
 
-def label_data(data: pd.DataFrame, cluster_centers: list[int], center_points: np.ndarray,
-               distance_matrix: np.ndarray) -> pd.DataFrame:
+def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: np.ndarray) -> pd.DataFrame:
     """
     Assign labels to data based on the distance matrix and cluster centers.
     Args:
         data: The data to be labeled.
         cluster_centers: The cluster centers.
-        center_points: The center points.
         distance_matrix: The distance matrix.
     Returns:
         pd.DataFrame: The labeled data.
     """
+    # TODO: Vectorize this
     labels = [0]*len(data)
     for i in range(len(data)):
         min_distance = np.inf
