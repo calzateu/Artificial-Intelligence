@@ -307,7 +307,7 @@ def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: 
         new_cost = 0
         for i in range(c):
             for j in range(len(data_copy)):
-                new_cost += (membership_matrix[j, i] ** m) * distance_matrix[j, i]
+                new_cost += (membership_matrix[j, i] ** m) * (distance_matrix[j, i] ** 2)
         # new_cost = sum([sum([(membership_matrix[i] ** m) * norm(center_points[i], data_copy[j], **kwargs)])
         #                # for i in range(c)])
 
