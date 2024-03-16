@@ -19,6 +19,9 @@ if __name__ == '__main__':
     # Select subsample size
     sub_sample_size = None
 
+    # Select which algorithm to use
+    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+
     # Select if you want to plot the clusters
     graphic_clusters = False
 
@@ -56,5 +59,6 @@ if __name__ == '__main__':
                                            run_clustering=run_clustering, is_in_data_folder=is_in_data_folder,
                                            name_of_dataset=name_of_dataset, path_to_data=path_to_data,
                                            drop_axes=drop_axes, subsample_size=sub_sample_size,
+                                           clustering_methods_names=clustering_methods_names,
                                            graphic_clusters=graphic_clusters, num_components=num_components,
                                            run_distances=run_distances, **kwargs)

@@ -294,12 +294,6 @@ def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: 
             center_points[i] = np.sum(
                 [(membership_matrix[j, i] ** m) * data_copy[j] for j in range(len(data_copy))], axis=0
             ) / sum([(membership_matrix[j, i] ** m) for j in range(len(data_copy))])
-            # center_points[i] = np.sum(
-            #     (membership_matrix[i] ** m) * data_copy, axis=1
-            # ) / np.sum(
-            #     membership_matrix[i] ** m
-            # )
-            print(f"Center point {i}: {center_points[i]}")
 
         distance_matrix = dp.compute_distances((data_copy, center_points), norm, **kwargs)
 

@@ -7,7 +7,7 @@ import input_output as io
 import pandas as pd
 import norms
 import numpy as np
-from typing import Callable, Literal
+from typing import Callable, List, Literal, Union
 import synthetic_data as sd
 
 
@@ -180,16 +180,19 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
                                                            transformed_cen_points_tsne, transformed_cen_points_umap],
                                                           labels, plot_names, axes)
 
+    # End of pipeline
+    print()
+
     if return_center_points:
         return center_points
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples: int = 10000,
                               run_clustering: bool = False, is_in_data_folder: bool = True, name_of_dataset: str = None,
-                              path_to_data: str = None,
-                              drop_axes: list = None,
-                              subsample_size: int = None, graphic_clusters: bool = False,
-                              num_components: int = 2, run_distances: bool = False, **kwargs) -> None:
+                              path_to_data: str = None, drop_axes: list = None, subsample_size: int = None,
+                              clustering_methods_names: list[str] = None,
+                              graphic_clusters: bool = False, num_components: int = 2, run_distances: bool = False,
+                              **kwargs) -> None:
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
@@ -202,6 +205,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         path_to_data (str): The path to the data if it is not in the data folder.
         drop_axes (list): The axes to drop.
         subsample_size (int): The size of the subsample.
+        clustering_methods: The clustering methods to use.
         graphic_clusters (bool): Whether to graph the clusters.
         num_components (int): The number of components.
         run_distances (bool): Whether to run distance calculations.
@@ -226,8 +230,11 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         print("Running clustering...")
 
         # Choose norm
-        norm_name = kwargs.get("norm_name", "euclidean")
-        if norm_name == "manhattan":
+        norm_name = kwargs["norm_name"]
+
+        if norm_name == "euclidean":
+            norm = norms.euclidean_norm
+        elif norm_name == "manhattan":
             norm = norms.manhattan_norm
         elif norm_name == "p-norm":
             norm = norms.p_norm
@@ -240,7 +247,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         elif norm_name == "cosine":
             norm = norms.cosine_similarity
         else:
-            norm = norms.euclidean_norm
+            raise ValueError(f"Norm {norm_name} not recognized.")
 
         # Read data
         if is_in_data_folder:
@@ -258,31 +265,36 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         else:
             subsample = data
 
+        # Get the clustering methods
+        if clustering_methods_names is not None:
+            clustering_methods = []
+            for method_name in clustering_methods_names:
+                if method_name == "mountain":
+                    clustering_methods.append(clustering.mountain_clustering)
+                elif method_name == "subtractive":
+                    clustering_methods.append(clustering.subtractive_clustering)
+                elif method_name == "k-means":
+                    clustering_methods.append(clustering.k_means_clustering)
+                elif method_name == "fuzzy c-means":
+                    clustering_methods.append(clustering.fuzzy_c_means_clustering)
+                else:
+                    raise ValueError(f"Clustering method {method_name} not recognized."
+                                     f"Try 'mountain', 'subtractive', 'k-means', or 'fuzzy c-means'.")
+
+        else:
+            clustering_methods = [clustering.fuzzy_c_means_clustering]
+
         # Normalize data with min-max normalization.
         normalized_subsample = dp.normalize(subsample)
 
         distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
 
-        # Run mountain clustering. Select graphics=False to not display the mountain function.
-        # center_points = __run_clustering_pipeline(clustering_method=clustering.mountain_clustering,
-        #                                           data=normalized_subsample, num_components=num_components,
-        #                                           distance_matrix=distance_matrix, return_center_points=True,
-        #                                           graphics=False, **kwargs)
-
-        # Run subtractive clustering. Select graphics=False to not display the density function.
-        # __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
-        #                           num_components=num_components, distance_matrix=distance_matrix, graphics=False,
-        #                           **kwargs)
-
-        # Run k-means
-        # __run_clustering_pipeline(clustering_method=clustering.k_means_clustering, data=normalized_subsample,
-        #                           num_components=num_components, distance_matrix=distance_matrix, graphics=True,
-        #                           initial_cluster_points=center_points, **kwargs)
-
-        # Run fuzzy c-means
-        __run_clustering_pipeline(clustering_method=clustering.fuzzy_c_means_clustering, data=normalized_subsample,
-                                  graphic_clusters=graphic_clusters, num_components=num_components,
-                                  distance_matrix=distance_matrix, graphics=True, **kwargs)
+        # Run each clustering method
+        for clustering_method in clustering_methods:
+            __run_clustering_pipeline(clustering_method=clustering_method, data=normalized_subsample,
+                                      graphic_clusters=graphic_clusters, num_components=num_components,
+                                      distance_matrix=distance_matrix, return_center_points=False, graphics=False,
+                                      **kwargs)
 
     if run_distances:
         print("Calculating distances...")
