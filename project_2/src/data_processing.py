@@ -29,14 +29,14 @@ def normalize(data: pd.DataFrame) -> pd.DataFrame:
     return (data - data.min()) / (data.max() - data.min())
 
 
-def __build_distance_matrix(data1: np.ndarray, data2: np.ndarray, norm: Callable, *args) -> np.ndarray:
+def __build_distance_matrix(data1: np.ndarray, data2: np.ndarray, norm: Callable, **kwargs) -> np.ndarray:
     """
     Build a distance matrix between two data sets using a given norm function and optional additional arguments.
     Args:
         data1: The first data set.
         data2: The second data set.
         norm: The function used to compute distances between elements.
-        *args: Additional arguments to be passed to the norm function.
+        **kwargs: Additional arguments to be passed to the norm function.
     Returns:
         np.ndarray: The distance matrix between the two data sets.
     """
@@ -46,24 +46,24 @@ def __build_distance_matrix(data1: np.ndarray, data2: np.ndarray, norm: Callable
     for i in range(len_data1):
         if len_data1 == len_data2:
             for j in range(i, len_data2):
-                distance_matrix[i, j] = norm(data1[i], data2[j], *args)
+                distance_matrix[i, j] = norm(data1[i], data2[j], **kwargs)
                 distance_matrix[j, i] = distance_matrix[i, j]
         else:
             for j in range(len_data2):
-                distance_matrix[i, j] = norm(data1[i], data2[j], *args)
+                distance_matrix[i, j] = norm(data1[i], data2[j], **kwargs)
 
     return distance_matrix
 
 
 def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray] | tuple[pd.DataFrame, pd.DataFrame],
-                      norm, *args) -> np.array:
+                      norm, **kwargs) -> np.array:
     """
     Compute distances between elements in a subsample using a given norm function and optional additional arguments.
     Args:
         data: The data for which distances are to be computed. Can be either a single DataFrame or a tuple.
             If a tuple, the first element is the first DataFrame and the second element is a numpy array.
         norm: The function used to compute distances between elements.
-        *args: Additional arguments to be passed to the norm function.
+        **kwargs: Additional arguments to be passed to the norm function.
     Returns:
         np.array: An array of distances between elements in the subsample.
     """
@@ -95,7 +95,7 @@ def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray] | tup
     else:
         raise TypeError("data must be either a tuple or a DataFrame")
 
-    return __build_distance_matrix(data1, data2, norm, *args)
+    return __build_distance_matrix(data1, data2, norm, **kwargs)
 
 
 def label_data(data: pd.DataFrame, cluster_centers: list[int], center_points: np.ndarray,

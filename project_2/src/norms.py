@@ -4,7 +4,7 @@ import numpy as np
 inverse_covariance_matrix = None
 
 
-def euclidean_norm(vector1: np.ndarray, vector2: np.ndarray) -> float:
+def euclidean_norm(vector1: np.ndarray, vector2: np.ndarray, **kwargs) -> float:
     """
     Calculate the Euclidean norm between two input vectors.
 
@@ -18,7 +18,7 @@ def euclidean_norm(vector1: np.ndarray, vector2: np.ndarray) -> float:
     return np.sqrt(np.sum(np.square(vector1 - vector2)))
 
 
-def manhattan_norm(vector1: np.ndarray, vector2: np.ndarray) -> float:
+def manhattan_norm(vector1: np.ndarray, vector2: np.ndarray, **kwargs) -> float:
     """
     Calculate the Manhattan norm between two input vectors.
 
@@ -32,7 +32,7 @@ def manhattan_norm(vector1: np.ndarray, vector2: np.ndarray) -> float:
     return np.sum(np.abs(vector1 - vector2))
 
 
-def cosine_similarity(vector1: np.ndarray, vector2: np.ndarray) -> float:
+def cosine_similarity(vector1: np.ndarray, vector2: np.ndarray, **kwargs) -> float:
     """
     Calculate the cosine similarity between two input vectors.
 
@@ -49,7 +49,7 @@ def cosine_similarity(vector1: np.ndarray, vector2: np.ndarray) -> float:
     return similarity
 
 
-def p_norm(vector1: np.ndarray, vector2: np.ndarray, p: int) -> float:
+def p_norm(vector1: np.ndarray, vector2: np.ndarray, p: int, **kwargs) -> float:
     """
     Calculate the p-norm of two vectors.
 
@@ -64,7 +64,7 @@ def p_norm(vector1: np.ndarray, vector2: np.ndarray, p: int) -> float:
     return np.power(np.sum(np.power(np.abs(vector1 - vector2), p)), 1/p)
 
 
-def mahalanobis_distance(vector1: np.ndarray, vector2: np.ndarray, covariance_matrix: np.ndarray) -> float:
+def mahalanobis_distance(vector1: np.ndarray, vector2: np.ndarray, covariance_matrix: np.ndarray, **kwargs) -> float:
     """
     Calculate the Mahalanobis distance between two input vectors.
 

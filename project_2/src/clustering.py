@@ -1,7 +1,6 @@
 import data_processing as dp
 import matplotlib.pyplot as plt
 import mesh
-import norms
 import numpy as np
 import pandas as pd
 from typing import Callable
@@ -24,7 +23,7 @@ def __calc_mountain_term(norm_value: float, constant: float) -> float:
 
 
 def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: float,
-                        graphics: bool = False) -> tuple[list[int], np.ndarray, np.ndarray]:
+                        graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform mountain clustering on the given data.
 
@@ -44,7 +43,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     array = np.linspace(0, 1, 3)
     grid = mesh.create_mesh(array, 4)
 
-    distances_data_grid = dp.compute_distances((data, grid), norms.euclidean_norm)
+    distances_data_grid = dp.compute_distances((data, grid), norm, **kwargs)
 
     # Second step: construct mountain function
     number_of_points = sum(grid.shape[:-1])
@@ -63,7 +62,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     last_center = np.argmax(m)
     cluster_centers = [last_center]
 
-    distances_grid_grid = dp.compute_distances((grid, grid), norms.euclidean_norm)
+    distances_grid_grid = dp.compute_distances((grid, grid), norm)
 
     stop = False
     while not stop:
@@ -102,7 +101,7 @@ def __calc_density_measure(vector1: np.ndarray, vector2: np.ndarray, norm: Calla
 
 
 def subtractive_clustering(data: pd.DataFrame, norm: Callable, r_a: float, r_b: float,
-                           graphics: bool = False) -> tuple[list[int], np.ndarray]:
+                           graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray]:
     """
     Perform subtractive clustering on the given data.
 
@@ -198,7 +197,7 @@ def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, norm: Callabl
 
 
 def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_points: np.ndarray = None,
-                       graphics: bool = False) -> tuple[list[int], np.ndarray]:
+                       graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray]:
     """
     Perform k-means clustering on the given data.
 

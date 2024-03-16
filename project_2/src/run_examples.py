@@ -7,7 +7,7 @@ import input_output as io
 import pandas as pd
 import norms
 import numpy as np
-from typing import Callable
+from typing import Callable, Literal
 import synthetic_data as sd
 
 
@@ -118,22 +118,25 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, num_components: int = 2,
-                              graphics: bool = False, *args):
+                              distance_matrix: np.ndarray = None, graphics: bool = False, **kwargs):
     """
     Run a clustering pipeline using the specified method on the provided data.
     Args:
         clustering_method (Callable): The clustering method to use.
         data (pd.DataFrame): The input data for clustering.
         num_components (int): The number of components for dimensionality reduction (default 2).
+        distance_matrix (np.ndarray): The distance matrix.
         graphics (bool): Flag indicating whether to visualize the clustering results (default False).
-        *args: Additional arguments for the clustering method.
     Returns:
         tuple: A tuple containing the cluster centers and center points.
     """
     print(f"Running clustering pipeline with {clustering_method.__name__}...")
-    # Run clustering methods.
+    if distance_matrix is None:
+        distance_matrix = dp.compute_distances((data, data), norms.euclidean_norm)
+
+    # Run clustering method.
     cluster_centers, center_points, distances_data_to_centers = clustering_method(
-        data, norms.euclidean_norm, *args, graphics=graphics
+        data=data, norm=norms.euclidean_norm, distance_matrix=distance_matrix, graphics=graphics, **kwargs
     )
 
     print(f"Found {len(cluster_centers)} cluster centers:")
@@ -176,7 +179,7 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
                               drop_axes: list = None, subsample_size: int = None, num_components: int = 2,
-                              run_distances: bool = False):
+                              run_distances: bool = False, **kwargs) -> None:
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
@@ -208,6 +211,24 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
     if run_clustering:
         print("Running clustering...")
+
+        # Choose norm
+        norm_name = kwargs.get("norm_name", "euclidean")
+        if norm_name == "manhattan":
+            norm = norms.manhattan_norm
+        elif norm_name == "p-norm":
+            norm = norms.p_norm
+            p = kwargs.get("p", None)
+            if p is None:
+                print(f"Parameter p not specified. Using p-norm with p = {kwargs.get('p', 3)}")
+                kwargs["p"] = 3
+        elif norm_name == "mahalanobis":
+            norm = norms.mahalanobis_distance
+        elif norm_name == "cosine":
+            norm = norms.cosine_similarity
+        else:
+            norm = norms.euclidean_norm
+
         # Read synthetic data
         is_in_data_folder = True
         if is_in_data_folder:
@@ -229,12 +250,16 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # Normalize data with min-max normalization.
         normalized_subsample = dp.normalize(subsample)
 
+        distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
+
         # Run mountain clustering. Select graphics=False to not display the mountain function.
-        __run_clustering_pipeline(clustering.mountain_clustering, normalized_subsample, num_components,
-                                 False, 1, 1)
+        __run_clustering_pipeline(clustering_method=clustering.mountain_clustering, data=normalized_subsample,
+                                  num_components=num_components, distance_matrix=distance_matrix, graphics=False,
+                                  **kwargs)
         # Run subtractive clustering. Select graphics=False to not display the density function.
-        # __run_clustering_pipeline(clustering.subtractive_clustering, normalized_subsample, num_components,
-        #                           False, 0.5, 0.8)
+        # __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
+        #                           num_components=num_components, distance_matrix=distance_matrix, graphics=False,
+        #                           **kwargs)
 
         # __run_clustering_pipeline(clustering.k_means_clustering, normalized_subsample, num_components,
         #                           False, 4, None)
@@ -257,9 +282,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
         distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
-        distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, 2)
+        distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, **{"p": 2})
         covariance_matrix = np.cov(subsample, rowvar=False)
-        distances_mahalanobis = dp.compute_distances(subsample, norms.mahalanobis_distance, covariance_matrix)
+        distances_mahalanobis = dp.compute_distances(subsample, norms.mahalanobis_distance,
+                                                     **{"covariance_matrix": covariance_matrix})
 
         gr.grap_distance_matrix(distances_euclidean, method_name="Euclidean")
         gr.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
