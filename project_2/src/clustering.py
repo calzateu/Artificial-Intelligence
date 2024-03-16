@@ -149,51 +149,54 @@ def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.fl
     return cluster_centers, data.iloc[cluster_centers], distance_matrix[:, cluster_centers]
 
 
-def __calc_cost(data: np.ndarray, clusters: np.ndarray, cluster_centers: np.ndarray, norm: Callable) -> float:
+def __calc_cost(data: np.ndarray, clusters: np.ndarray, distances: np.ndarray) -> float:
     """
     Calculate the cost of the clustering.
 
     Args:
         data: The input data.
-        cluster_centers: The cluster centers.
-        norm: The normalization function.
+        clusters: Array containing the cluster assignments for each data point.
+        distances: The distance matrix between the data points and the cluster centers.
 
     Returns:
         float: The cost of the clustering.
     """
     # TODO: don't call the norm function here, but pass it as a parameter or the matrix
+    # TODO: review the if. It can be worse that computing the distance matrix
     cost = 0
     for i in clusters:
         # Get the cluster points
-        for j in data[clusters == i]:
+        #for j in data[clusters == i]:
+        for j in range(len(data)):
             # Add the distance of each point to the cluster center
-            cost += norm(cluster_centers[i], j)
+            if clusters[j] == i:
+                cost += distances[j, i]
 
     return cost
 
 
-def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, norm: Callable) -> np.ndarray:
+def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, distances: np.ndarray) -> np.ndarray:
     """
     Assigns data points to clusters based on the distance from cluster centers.
 
     Args:
         data: A numpy array representing the data points to be assigned to clusters.
         cluster_centers: A numpy array representing the cluster centers.
-        norm: A function to calculate the distance between data points and cluster centers.
+        distances: A numpy array representing the distance matrix between the data points and the cluster centers.
 
     Returns:
         An array containing the cluster assignments for each data point.
     """
     # Go through each data point and assign it to the closest cluster.
     clusters = np.argmin(
-        np.array([[norm(x_k, center) for center in cluster_centers] for x_k in data]),
+        np.array([[distances[k, c_i] for c_i in range(len(cluster_centers))] for k in range(len(data))]),
         axis=1
     )
     return clusters
 
 
 def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_points: np.ndarray = None,
-                       graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray]:
+                       graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform k-means clustering on the given data.
 
@@ -210,6 +213,7 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     Returns:
         list[int]: The indices of the cluster centers.
         np.ndarray: The cluster centers (data points).
+        np.ndarray: The distance matrix between the data points and the cluster centers.
     """
     # Create a copy of the data
     data_copy = data.copy()
@@ -227,12 +231,15 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     cost = np.inf
     cont = 0
     while True:
+        distances = dp.compute_distances((data_copy, center_points), norm, **kwargs)
+
         print(f"Iteration: {cont}, Cost: {cost}")
         # Step 2: determine the membership matrix U. It is assigning each point to the closest cluster center.
-        clusters = assign_clusters(data_copy, center_points, norm)
+        clusters = assign_clusters(data_copy, center_points, distances)
 
         # Step 3: compute the cost function
-        new_cost = __calc_cost(data_copy, clusters, center_points, norm)
+        new_cost = __calc_cost(data_copy, clusters, distances)
+
         # Check if the cost has decreased
         if cost - new_cost <= 0:
             break
@@ -248,4 +255,4 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     # As we have new points, we assign them new indexes.
     nodes_index = [len(data) + i for i in range(len(center_points))]
 
-    return nodes_index, center_points
+    return nodes_index, center_points, distances

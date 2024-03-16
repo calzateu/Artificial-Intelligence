@@ -256,13 +256,16 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # __run_clustering_pipeline(clustering_method=clustering.mountain_clustering, data=normalized_subsample,
         #                           num_components=num_components, distance_matrix=distance_matrix, graphics=False,
         #                           **kwargs)
-        # Run subtractive clustering. Select graphics=False to not display the density function.
-        __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
-                                  num_components=num_components, distance_matrix=distance_matrix, graphics=False,
-                                  **kwargs)
 
-        # __run_clustering_pipeline(clustering.k_means_clustering, normalized_subsample, num_components,
-        #                           False, 4, None)
+        # Run subtractive clustering. Select graphics=False to not display the density function.
+        # __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
+        #                           num_components=num_components, distance_matrix=distance_matrix, graphics=False,
+        #                           **kwargs)
+
+        # Run k-means
+        __run_clustering_pipeline(clustering_method=clustering.k_means_clustering, data=normalized_subsample,
+                                  num_components=num_components, distance_matrix=distance_matrix, graphics=True,
+                                  **kwargs)
 
     if run_distances:
         print("Calculating distances...")

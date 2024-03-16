@@ -20,11 +20,16 @@ if __name__ == '__main__':
     # kwargs["norm_name"], kwargs["p"] = "p-norm", 3
     # kwargs["norm_name"] = "cosine"
 
+    # Parameters for mountain clustering
     kwargs["sigma"] = 1
     kwargs["beta"] = 1
 
+    # Parameters for subtractive clustering
     kwargs["r_a"] = 0.5
     kwargs["r_b"] = 0.8
+
+    # Parameters for k-means clustering
+    kwargs["k"] = 4
 
     # Choose if you want to run distance calculations and plot graphs.
     run_distances = False
