@@ -117,14 +117,16 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
                                                     save_animation=save_animation)
 
 
-def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, num_components: int = 2,
-                              distance_matrix: np.ndarray = None, return_center_points: bool = False,
+def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, graphic_clusters: bool = False,
+                              num_components: int = 2, distance_matrix: np.ndarray = None,
+                              return_center_points: bool = False,
                               graphics: bool = False, **kwargs) -> np.ndarray | None:
     """
     Run a clustering pipeline using the specified method on the provided data.
     Args:
         clustering_method (Callable): The clustering method to use.
         data (pd.DataFrame): The input data for clustering.
+        graphic_clusters (bool): Flag indicating whether to visualize the clusters (default False).
         num_components (int): The number of components for dimensionality reduction (default 2).
         distance_matrix (np.ndarray): The distance matrix.
         graphics (bool): Flag indicating whether to visualize the clustering results (default False).
@@ -140,58 +142,67 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
         data=data, norm=norms.euclidean_norm, distance_matrix=distance_matrix, graphics=graphics, **kwargs
     )
 
-    print(f"Found {len(cluster_centers)} cluster centers:")
+    print(f"Found {len(cluster_centers)} cluster centers with {clustering_method.__name__}:")
     print(cluster_centers)
 
     # Label data
     print("Labeling data...")
     labels = dp.label_data(data, cluster_centers, distances_data_to_centers)
 
-    # Run dimensionality reduction
-    print("Running dimensionality reduction...")
-    # Check if number of axes is 2 or 3.
-    if num_components == 2:
-        axes = ["PC1", "PC2"]
-    elif num_components == 3:
-        axes = ["PC1", "PC2", "PC3"]
-    else:
-        raise ValueError("Number of axes must be 2 or 3.")
-
     # Run dimensionality reduction for PCA, t-SNE, and UMAP.
-    principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
-        "pca", data, center_points, num_components=num_components, axes=axes
-    )
-    principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
-        "tsne", data, center_points, num_components=num_components, axes=axes
-    )
-    principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
-        "umap", data, center_points, num_components=num_components, axes=axes
-    )
-    plot_names = ["PCA", "t-SNE", "UMAP"]
+    if graphic_clusters:
+        # Run dimensionality reduction
+        print("Running dimensionality reduction...")
+        # Check if number of axes is 2 or 3.
+        if num_components == 2:
+            axes = ["PC1", "PC2"]
+        elif num_components == 3:
+            axes = ["PC1", "PC2", "PC3"]
+        else:
+            raise ValueError("Number of axes must be 2 or 3.")
 
-    # Visualize clustering results.
-    print("Visualizing clustering results...")
-    gr.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
-                                                       principal_df_umap], cluster_centers,
-                                                      [transformed_cen_points_pca,
-                                                       transformed_cen_points_tsne, transformed_cen_points_umap],
-                                                      labels, plot_names, axes)
+        principal_df_pca, transformed_cen_points_pca = dr.reduce_dimensionality(
+            "pca", data, center_points, num_components=num_components, axes=axes
+        )
+        principal_df_tsne, transformed_cen_points_tsne = dr.reduce_dimensionality(
+            "tsne", data, center_points, num_components=num_components, axes=axes
+        )
+        principal_df_umap, transformed_cen_points_umap = dr.reduce_dimensionality(
+            "umap", data, center_points, num_components=num_components, axes=axes
+        )
+        plot_names = ["PCA", "t-SNE", "UMAP"]
+
+        # Visualize clustering results.
+        print("Visualizing clustering results...")
+        gr.graph_clustering_results_for_multiple_datasets([principal_df_pca, principal_df_tsne,
+                                                           principal_df_umap], cluster_centers,
+                                                          [transformed_cen_points_pca,
+                                                           transformed_cen_points_tsne, transformed_cen_points_umap],
+                                                          labels, plot_names, axes)
 
     if return_center_points:
         return center_points
 
 
-def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
-                              drop_axes: list = None, subsample_size: int = None, num_components: int = 2,
-                              run_distances: bool = False, **kwargs) -> None:
+def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples: int = 10000,
+                              run_clustering: bool = False, is_in_data_folder: bool = True, name_of_dataset: str = None,
+                              path_to_data: str = None,
+                              drop_axes: list = None,
+                              subsample_size: int = None, graphic_clusters: bool = False,
+                              num_components: int = 2, run_distances: bool = False, **kwargs) -> None:
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
     Args:
         generate_synthetic_data (bool): Whether to generate synthetic data.
+        num_samples (int): The number of samples to generate with synthetic data.
         run_clustering (bool): Whether to run clustering.
+        is_in_data_folder (bool): Whether the data is in the data folder. It is used to run clustering.
+        name_of_dataset (str): The name of the dataset if it is in the data folder.
+        path_to_data (str): The path to the data if it is not in the data folder.
         drop_axes (list): The axes to drop.
         subsample_size (int): The size of the subsample.
+        graphic_clusters (bool): Whether to graph the clusters.
         num_components (int): The number of components.
         run_distances (bool): Whether to run distance calculations.
 
@@ -201,8 +212,6 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
     # Choose if you want to generate synthetic data.
     if generate_synthetic_data:
         # Generate 10000 samples
-        num_samples = 10000
-
         print(f"Generating {num_samples} samples of synthetic data...")
 
         # Specify min and max values for each variable.
@@ -233,13 +242,11 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         else:
             norm = norms.euclidean_norm
 
-        # Read synthetic data
-        is_in_data_folder = True
+        # Read data
         if is_in_data_folder:
-            # data = io.read_data(filename="output_centroid.csv")
-            data = io.read_data(filename="Iris.csv")
+            data = io.read_data(filename=name_of_dataset)
         else:
-            data = io.read_data(custom_path_to_data="your_path/data.csv")
+            data = io.read_data(custom_path_to_data=path_to_data)
 
         data = data.drop(drop_axes, axis=1)
 
@@ -274,8 +281,8 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
 
         # Run fuzzy c-means
         __run_clustering_pipeline(clustering_method=clustering.fuzzy_c_means_clustering, data=normalized_subsample,
-                                  num_components=num_components, distance_matrix=distance_matrix, graphics=True,
-                                  **kwargs)
+                                  graphic_clusters=graphic_clusters, num_components=num_components,
+                                  distance_matrix=distance_matrix, graphics=True, **kwargs)
 
     if run_distances:
         print("Calculating distances...")
