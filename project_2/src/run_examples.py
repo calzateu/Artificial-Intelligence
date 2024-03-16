@@ -257,10 +257,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
 
         # Run mountain clustering. Select graphics=False to not display the mountain function.
-        center_points = __run_clustering_pipeline(clustering_method=clustering.mountain_clustering,
-                                                  data=normalized_subsample, num_components=num_components,
-                                                  distance_matrix=distance_matrix, return_center_points=True,
-                                                  graphics=False, **kwargs)
+        # center_points = __run_clustering_pipeline(clustering_method=clustering.mountain_clustering,
+        #                                           data=normalized_subsample, num_components=num_components,
+        #                                           distance_matrix=distance_matrix, return_center_points=True,
+        #                                           graphics=False, **kwargs)
 
         # Run subtractive clustering. Select graphics=False to not display the density function.
         # __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
@@ -268,9 +268,14 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         #                           **kwargs)
 
         # Run k-means
-        __run_clustering_pipeline(clustering_method=clustering.k_means_clustering, data=normalized_subsample,
+        # __run_clustering_pipeline(clustering_method=clustering.k_means_clustering, data=normalized_subsample,
+        #                           num_components=num_components, distance_matrix=distance_matrix, graphics=True,
+        #                           initial_cluster_points=center_points, **kwargs)
+
+        # Run fuzzy c-means
+        __run_clustering_pipeline(clustering_method=clustering.fuzzy_c_means_clustering, data=normalized_subsample,
                                   num_components=num_components, distance_matrix=distance_matrix, graphics=True,
-                                  initial_cluster_points=center_points, **kwargs)
+                                  **kwargs)
 
     if run_distances:
         print("Calculating distances...")

@@ -256,3 +256,79 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     nodes_index = [len(data) + i for i in range(len(center_points))]
 
     return nodes_index, center_points, distances
+
+
+def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: int = 2,
+                             graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+    """
+    Perform fuzzy c-means clustering on the given data.
+
+    Args:
+        data: The input data for clustering.
+        norm: The normalization function.
+        c: The number of cluster centers.
+        m: The weighting exponent.
+        graphics: Whether to display graphics. Defaults to False.
+
+    Returns:
+        list[int]: The indices of the cluster centers.
+        np.ndarray: The cluster centers (data points).
+        np.ndarray: The distance matrix between the data points and the cluster centers.
+    """
+    # Create a copy of the data
+    data_copy = data.copy()
+    # Convert the data to a numpy array, so we can perform operations easily.
+    data_copy = data_copy.values
+
+    # Step 1: Initialize membership matrix with random values between 0 and 1 and the sum of each row is 1.
+    # Also, the columns are the c cluster centers.
+    membership_matrix = np.random.rand(len(data), c)
+    membership_matrix = membership_matrix / np.sum(membership_matrix, axis=1).reshape(-1, 1)
+
+    cost = np.inf
+    cont = 0
+    center_points = np.zeros((c, data_copy.shape[1]))
+    while True:
+        # Step 2: Calculate c fuzzy cluster centers.
+        for i in range(c):
+            center_points[i] = np.sum(
+                [(membership_matrix[j, i] ** m) * data_copy[j] for j in range(len(data_copy))], axis=0
+            ) / sum([(membership_matrix[j, i] ** m) for j in range(len(data_copy))])
+            # center_points[i] = np.sum(
+            #     (membership_matrix[i] ** m) * data_copy, axis=1
+            # ) / np.sum(
+            #     membership_matrix[i] ** m
+            # )
+            print(f"Center point {i}: {center_points[i]}")
+
+        distance_matrix = dp.compute_distances((data_copy, center_points), norm, **kwargs)
+
+        # Step 3: compute the cost function
+        new_cost = 0
+        for i in range(c):
+            for j in range(len(data_copy)):
+                new_cost += (membership_matrix[j, i] ** m) * distance_matrix[j, i]
+        # new_cost = sum([sum([(membership_matrix[i] ** m) * norm(center_points[i], data_copy[j], **kwargs)])
+        #                # for i in range(c)])
+
+        print(f"Iteration: {cont}, Cost: {new_cost}")
+        # Check if the cost has decreased
+        if cost - new_cost <= 0:
+            break
+        else:
+            cost = new_cost
+
+        # Step 4: Update the membership matrix
+        for i in range(c):
+            for j in range(len(data_copy)):
+                membership_matrix[j, i] = 1 / sum(
+                    [((distance_matrix[j, i] / distance_matrix[j, k]) ** (2 / (m - 1))) for k in range(c)]
+                )
+
+        cont += 1
+
+    # As we have new points, we assign them new indexes.
+    nodes_index = [len(data) + i for i in range(len(center_points))]
+
+    # TODO: return distance or membership matrix?
+    return nodes_index, center_points, distance_matrix

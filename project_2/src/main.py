@@ -9,7 +9,7 @@ if __name__ == '__main__':
     run_clustering = True
     drop_axes = ["Id", "Species"]
     sub_sample_size = None
-    num_components = 3
+    num_components = 2
 
     kwargs = {}
 
@@ -30,6 +30,10 @@ if __name__ == '__main__':
 
     # Parameters for k-means clustering
     kwargs["k"] = 4
+
+    # Parameters for fuzzy c-means clustering
+    kwargs["c"] = 4
+    kwargs["m"] = 2
 
     # Choose if you want to run distance calculations and plot graphs.
     run_distances = False
