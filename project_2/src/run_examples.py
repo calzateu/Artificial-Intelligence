@@ -152,7 +152,7 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
     # Run dimensionality reduction for PCA, t-SNE, and UMAP.
     if graphic_clusters:
         # Run dimensionality reduction
-        print("Running dimensionality reduction...")
+        print("Running dimensionality reduction to visualize clustering results...")
         # Check if number of axes is 2 or 3.
         if num_components == 2:
             axes = ["PC1", "PC2"]

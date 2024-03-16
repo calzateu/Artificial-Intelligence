@@ -20,7 +20,8 @@ if __name__ == '__main__':
     sub_sample_size = None
 
     # Select which algorithm to use
-    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    clustering_methods_names = ["fuzzy c-means"]
 
     # Select if you want to plot the clusters
     graphic_clusters = False
