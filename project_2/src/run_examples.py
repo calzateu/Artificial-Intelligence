@@ -205,7 +205,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         path_to_data (str): The path to the data if it is not in the data folder.
         drop_axes (list): The axes to drop.
         subsample_size (int): The size of the subsample.
-        clustering_methods: The clustering methods to use.
+        clustering_methods_names (list[str]): The clustering methods to use.
         graphic_clusters (bool): Whether to graph the clusters.
         num_components (int): The number of components.
         run_distances (bool): Whether to run distance calculations.
