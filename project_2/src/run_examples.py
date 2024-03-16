@@ -118,7 +118,8 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 
 def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, num_components: int = 2,
-                              distance_matrix: np.ndarray = None, graphics: bool = False, **kwargs):
+                              distance_matrix: np.ndarray = None, return_center_points: bool = False,
+                              graphics: bool = False, **kwargs) -> np.ndarray | None:
     """
     Run a clustering pipeline using the specified method on the provided data.
     Args:
@@ -128,7 +129,7 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
         distance_matrix (np.ndarray): The distance matrix.
         graphics (bool): Flag indicating whether to visualize the clustering results (default False).
     Returns:
-        tuple: A tuple containing the cluster centers and center points.
+        np.ndarray | None: The cluster centers or None if return_center_points is False.
     """
     print(f"Running clustering pipeline with {clustering_method.__name__}...")
     if distance_matrix is None:
@@ -144,7 +145,7 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
 
     # Label data
     print("Labeling data...")
-    result = dp.label_data(data, cluster_centers, distances_data_to_centers)
+    labels = dp.label_data(data, cluster_centers, distances_data_to_centers)
 
     # Run dimensionality reduction
     print("Running dimensionality reduction...")
@@ -174,7 +175,10 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, n
                                                        principal_df_umap], cluster_centers,
                                                       [transformed_cen_points_pca,
                                                        transformed_cen_points_tsne, transformed_cen_points_umap],
-                                                      result['label'], plot_names, axes)
+                                                      labels, plot_names, axes)
+
+    if return_center_points:
+        return center_points
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_clustering: bool = False,
@@ -253,9 +257,10 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
 
         # Run mountain clustering. Select graphics=False to not display the mountain function.
-        # __run_clustering_pipeline(clustering_method=clustering.mountain_clustering, data=normalized_subsample,
-        #                           num_components=num_components, distance_matrix=distance_matrix, graphics=False,
-        #                           **kwargs)
+        center_points = __run_clustering_pipeline(clustering_method=clustering.mountain_clustering,
+                                                  data=normalized_subsample, num_components=num_components,
+                                                  distance_matrix=distance_matrix, return_center_points=True,
+                                                  graphics=False, **kwargs)
 
         # Run subtractive clustering. Select graphics=False to not display the density function.
         # __run_clustering_pipeline(clustering_method=clustering.subtractive_clustering, data=normalized_subsample,
@@ -265,7 +270,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, run_cluster
         # Run k-means
         __run_clustering_pipeline(clustering_method=clustering.k_means_clustering, data=normalized_subsample,
                                   num_components=num_components, distance_matrix=distance_matrix, graphics=True,
-                                  **kwargs)
+                                  initial_cluster_points=center_points, **kwargs)
 
     if run_distances:
         print("Calculating distances...")

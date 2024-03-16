@@ -494,7 +494,7 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], cen
 
 
 def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cluster_centers: list[int],
-                                                   center_points_by_method: list[np.ndarray], labels: list[int],
+                                                   center_points_by_method: list[np.ndarray], labels: np.array,
                                                    plot_names: list[str], axes_names: list[str] = None):
     """
     Visualizes clustering results based on the data points, cluster centers, and cluster labels for multiple datasets.

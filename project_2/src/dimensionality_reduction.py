@@ -24,7 +24,7 @@ def reduce_dimensionality(method: Literal['pca', 'tsne', 'umap'], data: pd.DataF
     # Store the original number of rows in data.
     original_rows = data.shape[0]
     # Drop the label column
-    temp_data = data.drop(columns=['label'], axis=1)
+    temp_data = data.copy()
 
     # Add the center points to the data if they are provided.
     if center_points is not None:

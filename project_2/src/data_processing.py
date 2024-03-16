@@ -99,7 +99,7 @@ def compute_distances(data: pd.DataFrame | tuple[pd.DataFrame, np.ndarray] | tup
     return __build_distance_matrix(data1, data2, norm, **kwargs)
 
 
-def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: np.ndarray) -> pd.DataFrame:
+def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: np.ndarray) -> np.ndarray:
     """
     Assign labels to data based on the distance matrix and cluster centers.
     Args:
@@ -107,10 +107,12 @@ def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: 
         cluster_centers: The cluster centers.
         distance_matrix: The distance matrix.
     Returns:
-        pd.DataFrame: The labeled data.
+        The labeled data.
     """
     # TODO: Vectorize this
+    # TODO: Allow to save results
     labels = [0]*len(data)
+    labels = np.array(labels)
     for i in range(len(data)):
         min_distance = np.inf
         min_center = -1
@@ -120,6 +122,4 @@ def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: 
                 min_center = cluster_centers[j]
         labels[i] = min_center
 
-    data["label"] = labels
-
-    return data
+    return labels
