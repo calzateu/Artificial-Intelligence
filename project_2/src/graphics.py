@@ -532,23 +532,22 @@ def plot_indices(dict_results, methods):
         param_keys = list(methods[method_name].keys())
 
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
 
         if len(param_keys) == 1:
-            ax.set_xlabel(param_keys[0])
-            ax.set_ylabel('Index')
+            plt.xlabel(param_keys[0])
+            plt.ylabel('Index')
 
             param_values = list(methods[method_name].values())
             x = np.array(param_values[0])
             y = results
 
             # Normalize y
-            y = (y - np.min(y)) / (np.max(y) - np.min(y))
+            # y = (y - np.min(y)) / (np.max(y) - np.min(y))
 
-            ax.scatter(x, y, y, c='r', marker='o')
-            ax.set_zlabel('Index')
+            plt.scatter(x, y, c=y, cmap='viridis', marker='o')
 
         elif len(param_keys) == 2:
+            ax = fig.add_subplot(111, projection='3d')
             ax.set_xlabel(param_keys[0])
             ax.set_ylabel(param_keys[1])
             ax.set_zlabel('Index')
@@ -558,9 +557,9 @@ def plot_indices(dict_results, methods):
             z = results
 
             # Normalize z
-            z = (z - np.min(z)) / (np.max(z) - np.min(z))
+            # z = (z - np.min(z)) / (np.max(z) - np.min(z))
 
-            ax.scatter(x, y, z, c='r', marker='o')
+            ax.scatter(x, y, z, c=z, cmap='viridis', marker='o')
 
-        ax.set_title(method_name)
+        plt.title(method_name)
         plt.show()

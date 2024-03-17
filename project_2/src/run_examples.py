@@ -510,16 +510,36 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
 
     print("Plotting results...")
 
+    # Min-max normalization of intra and extra results
+    results_intra_normalized = dict()
+    results_extra_normalized = dict()
+    for method_name in results_intra.keys():
+        results_intra_normalized[method_name] = (results_intra[method_name] - results_intra[method_name].min()) / (
+                results_intra[method_name].max() - results_intra[method_name].min())
+        results_extra_normalized[method_name] = (results_extra[method_name] - results_extra[method_name].min()) / (
+                results_extra[method_name].max() - results_extra[method_name].min())
+
     # Calculate weighted results
     weighted_results = {}
     for method_name in results_intra.keys():
-        weighted_results[method_name] = np.array(results_intra[method_name]) + np.array(results_extra[method_name])
+        weighted_results[method_name] = 0.5*np.array(results_intra_normalized[method_name]) + 0.5*np.array(
+            results_extra_normalized[method_name])
 
     # Plot results in 3d graphic with each set of parameters and as z value the inter-cluster index.
     gr.plot_indices(weighted_results, methods)
 
-    matrices = build_matrices(weighted_results, methods)
-    for matrix in matrices:
+    matrices_intra = build_matrices(results_intra, methods)
+    for matrix in matrices_intra:
+        print(f"Intra cluster indices for method {matrix[0]}:")
+        if len(matrix[0][0]) > 1:
+            print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
+        else:
+            print(tabulate.tabulate(matrix[1], tablefmt="fancy_grid"))
+        # print(tabulate.tabulate(matrix[1:], headers=matrix[1][0], tablefmt="latex_raw"))
+
+    matrices_extra = build_matrices(results_extra, methods)
+    for matrix in matrices_extra:
+        print(f"Extra cluster indices for method {matrix[0]}:")
         if len(matrix[0][0]) > 1:
             print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
         else:
