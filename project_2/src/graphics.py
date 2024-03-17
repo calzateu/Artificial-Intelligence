@@ -525,3 +525,42 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
         plot_clusters(data, cluster_centers, center_points, labels, axes_names, plot_name, ax)
 
     plt.show()
+
+
+def plot_indices(dict_results, methods):
+    for method_name, results in dict_results.items():
+        param_keys = list(methods[method_name].keys())
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        if len(param_keys) == 1:
+            ax.set_xlabel(param_keys[0])
+            ax.set_ylabel('Index')
+
+            param_values = list(methods[method_name].values())
+            x = np.array(param_values[0])
+            y = results
+
+            # Normalize y
+            y = (y - np.min(y)) / (np.max(y) - np.min(y))
+
+            ax.scatter(x, y, y, c='r', marker='o')
+            ax.set_zlabel('Index')
+
+        elif len(param_keys) == 2:
+            ax.set_xlabel(param_keys[0])
+            ax.set_ylabel(param_keys[1])
+            ax.set_zlabel('Index')
+
+            param_values = list(methods[method_name].values())
+            x, y = np.meshgrid(param_values[0], param_values[1])
+            z = results
+
+            # Normalize z
+            z = (z - np.min(z)) / (np.max(z) - np.min(z))
+
+            ax.scatter(x, y, z, c='r', marker='o')
+
+        ax.set_title(method_name)
+        plt.show()

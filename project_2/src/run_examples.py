@@ -8,10 +8,10 @@ import itertools
 import pandas as pd
 import norms
 import numpy as np
+import tabulate
 from typing import Callable
 import sklearn.metrics.cluster as cluster_metrics
 import synthetic_data as sd
-import matplotlib.pyplot as plt
 
 
 def run_system_all_chases(inputs: dict, t_norms: list[Callable], s_norms: list[Callable], defuzz_methods: list[str],
@@ -278,13 +278,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
 
         data = data.drop(drop_axes, axis=1)
 
-        # Get subsample
-        if subsample_size:
-            subsample_size = len(data)
-            print(f"Getting subsample of {subsample_size} rows...")
-            subsample = dp.get_subsample(data, subsample_size)
-        else:
-            subsample = data
+        normalized_subsample = dp.preprocess_data(data, subsample_size=subsample_size)
 
         # Get the clustering methods
         if clustering_methods_names is not None:
@@ -304,9 +298,6 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
 
         else:
             clustering_methods = [clustering.fuzzy_c_means_clustering]
-
-        # Normalize data with min-max normalization.
-        normalized_subsample = dp.normalize(subsample)
 
         distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
 
@@ -344,6 +335,36 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         gr.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
         gr.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
         gr.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis")
+
+
+def build_matrices(dict_results, methods):
+    matrices = []
+
+    for method_name, results in dict_results.items():
+        param_keys = list(methods[method_name].keys())
+
+        if len(param_keys) == 1:
+            param_values = list(methods[method_name].values())
+            rows = param_values[0]
+            y = results
+
+            export_matrix = [[row] + values for row, values in zip(rows, y.tolist())]
+            matrices.append((method_name, export_matrix))
+
+        elif len(param_keys) == 2:
+            param_values = list(methods[method_name].values())
+            rows, columns = param_values[0], param_values[1]
+            z = results
+
+            export_matrix = [[row] + values for row, values in zip(rows, z.tolist())]
+
+            # Add column labels
+            columns.insert(0, "")
+            export_matrix.insert(0, columns)
+
+            matrices.append((method_name, export_matrix))
+
+    return matrices
 
 
 def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, name_of_dataset: str = None,
@@ -395,19 +416,7 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
         drop_axes = []
     data = data.drop(drop_axes, axis=1)
 
-    # One hot encode labels
-    data = pd.get_dummies(data)
-    data.replace({True: 1, False: 0}, inplace=True)
-
-    data.infer_objects(copy=False)
-
-    # Get subsample
-    if subsample_size:
-        subsample_size = len(data)
-        print(f"Getting subsample of {subsample_size} rows...")
-        subsample = dp.get_subsample(data, subsample_size)
-    else:
-        subsample = data
+    normalized_subsample = dp.preprocess_data(data=data, subsample_size=subsample_size)
 
     # Get the clustering methods and parameters
     methods = dict()
@@ -444,9 +453,6 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
         raise ValueError("Clustering methods and parameters not specified.")
 
     print()
-
-    # Normalize data with min-max normalization.
-    normalized_subsample = dp.normalize(subsample)
 
     distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
 
@@ -489,13 +495,11 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
                                                    true_labels=true_labels,
                                                    graphics=False, **kwargs_temp)
 
-                results_intra[method.__name__][cont] = (result[1])
-                results_extra[method.__name__][cont] = (result[2])
+                # Store results for plotting
+                results_intra[method.__name__][cont] = result[1]
+                results_extra[method.__name__][cont] = result[2]
                 print(f"Done with {method.__name__} with params: {kwargs_temp} and \n"
                       f"got inter-cluster index: {result[1]} and extra-cluster index: {result[2]}.")
-
-                # Store results for plotting
-                print("Combination: ", combination)
 
                 cont += 1
 
@@ -512,46 +516,16 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
         weighted_results[method_name] = np.array(results_intra[method_name]) + np.array(results_extra[method_name])
 
     # Plot results in 3d graphic with each set of parameters and as z value the inter-cluster index.
-    for method_name, results in weighted_results.items():
-        param_keys = list(methods[method_name].keys())
+    gr.plot_indices(weighted_results, methods)
 
-        if len(param_keys) == 1:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+    matrices = build_matrices(weighted_results, methods)
+    for matrix in matrices:
+        if len(matrix[0][0]) > 1:
+            print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
+        else:
+            print(tabulate.tabulate(matrix[1], tablefmt="fancy_grid"))
+        # print(tabulate.tabulate(matrix[1:], headers=matrix[1][0], tablefmt="latex_raw"))
 
-            ax.set_xlabel(param_keys[0])
-            ax.set_ylabel('Extra-cluster index')
+    print("Done plotting results.")
 
-            param_values = list(methods[method_name].values())
-            x = np.array(param_values[0])
-            y = results
-
-            # Normalize y
-            y = (y - np.min(y)) / (np.max(y) - np.min(y))
-
-            ax.scatter(x, y, c='r', marker='o')
-
-            ax.set_title(method_name)
-            plt.show()
-
-        # If there is more than 1 parameter
-        elif len(param_keys) == 2:
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-
-            ax.set_xlabel(param_keys[0])
-            ax.set_ylabel(param_keys[1])
-            ax.set_zlabel('Intra-cluster index')
-
-            param_values = list(methods[method_name].values())
-            x, y = np.meshgrid((param_values[0]), param_values[1])
-
-            z = results
-
-            # Normalize z
-            z = (z - np.min(z)) / (np.max(z) - np.min(z))
-
-            ax.scatter(x, y, z, c='r', marker='o')
-
-            ax.set_title(method_name)
-            plt.show()
+    return

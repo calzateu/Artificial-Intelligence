@@ -24,7 +24,7 @@ if __name__ == '__main__':
     clustering_methods_names = ["fuzzy c-means"]
 
     # Select if you want to plot the clusters
-    graphic_clusters = False
+    graphic_clusters = True
 
     # Select number of components for dimensionality reduction. Only used if graphic_clusters is True
     num_components = 2
@@ -83,6 +83,12 @@ if __name__ == '__main__':
     # kwargs["norm_name"] = "cosine"
 
     clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+
+    # Select if you want to plot the clusters
+    graphic_clusters = False
+
+    # Select number of components for dimensionality reduction. Only used if graphic_clusters is True
+    num_components = 2
 
     # Parameters for mountain clustering
     kwargs["sigma_list"] = [0.5, 1, 2]

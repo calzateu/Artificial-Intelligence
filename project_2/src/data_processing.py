@@ -123,3 +123,35 @@ def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: 
         labels[i] = min_center
 
     return labels
+
+
+def preprocess_data(data: pd.DataFrame, subsample_size: int = None) -> pd.DataFrame:
+    """
+    Preprocess the data by standardizing it and converting it to a numpy array.
+    Args:
+        data: The data to be preprocessed.
+        subsample_size: The size of the subsample to be used.
+    Returns:
+        The preprocessed data as a pd.DataFrame.
+    """
+    # Get subsample
+    if subsample_size:
+        subsample_size = len(data)
+        print(f"Getting subsample of {subsample_size} rows...")
+        subsample = get_subsample(data, subsample_size)
+    else:
+        subsample = data
+
+    # Remove Nans
+    subsample = subsample.dropna()
+
+    # One hot encode labels
+    subsample = pd.get_dummies(subsample)
+    subsample.replace({True: 1, False: 0}, inplace=True)
+
+    subsample.infer_objects(copy=False)
+
+    # Normalize data with min-max normalization.
+    normalized_subsample = normalize(subsample)
+
+    return normalized_subsample
