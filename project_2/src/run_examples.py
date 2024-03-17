@@ -276,8 +276,11 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         else:
             data = io.read_data(custom_path_to_data=path_to_data)
 
-        data = data.drop(drop_axes, axis=1)
+        # Drop axes
+        if drop_axes is not None:
+            data = data.drop(drop_axes, axis=1)
 
+        # Subsample
         normalized_subsample = dp.preprocess_data(data, subsample_size=subsample_size)
 
         # Get the clustering methods

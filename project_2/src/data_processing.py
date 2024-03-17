@@ -136,7 +136,6 @@ def preprocess_data(data: pd.DataFrame, subsample_size: int = None) -> pd.DataFr
     """
     # Get subsample
     if subsample_size:
-        subsample_size = len(data)
         print(f"Getting subsample of {subsample_size} rows...")
         subsample = get_subsample(data, subsample_size)
     else:

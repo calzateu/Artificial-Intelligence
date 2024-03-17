@@ -7,17 +7,18 @@ if __name__ == '__main__':
     num_samples = 10000
 
     # ################## Choose if you want to run clustering.                              ##################
-    run_clustering = False
+    run_clustering = True
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
-    is_in_data_folder, name_of_dataset, path_to_data = True, "Iris.csv", None
+    is_in_data_folder, name_of_dataset, path_to_data = True, "output_centroid.csv", None
 
     # Select axes to drop from the data
-    drop_axes = ["Id", "Species"]
+    # drop_axes = ["Id", "Species"]
+    drop_axes = None
 
     # Select subsample size
-    sub_sample_size = None
+    sub_sample_size = 100
 
     # Select which algorithm to use
     # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
@@ -65,7 +66,7 @@ if __name__ == '__main__':
                                            run_distances=run_distances, **kwargs)
 
     # ################## Choose if you want to run the clustering indices.                  ##################
-    run_indices = True
+    run_indices = False
 
     # Select axes to drop from the data
     drop_axes = ["Id", "Species"]
