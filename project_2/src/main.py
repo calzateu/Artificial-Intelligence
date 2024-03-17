@@ -67,6 +67,12 @@ if __name__ == '__main__':
     # ################## Choose if you want to run the clustering indices.                  ##################
     run_indices = True
 
+    # Select axes to drop from the data
+    drop_axes = ["Id", "Species"]
+
+    # select the labels
+    target = "Species"
+
     kwargs = dict()
 
     # Select the norm to use.
@@ -96,6 +102,7 @@ if __name__ == '__main__':
     if run_indices:
         run_examples.run_clustering_algorithms_and_plot_indices(is_in_data_folder=is_in_data_folder,
                                                                 name_of_dataset=name_of_dataset,
+                                                                target=target,
                                                                 path_to_data=path_to_data, drop_axes=drop_axes,
                                                                 subsample_size=sub_sample_size,
                                                                 clustering_methods_names=clustering_methods_names,

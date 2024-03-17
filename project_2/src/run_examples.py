@@ -123,8 +123,8 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, graphic_clusters: bool = False,
                               num_components: int = 2, distance_matrix: np.ndarray = None,
                               return_center_points: bool = False, intra_cluster_index: Callable = None,
-                              extra_cluster_index: Callable = None, graphics: bool = False,
-                              **kwargs) -> np.ndarray | None:
+                              extra_cluster_index: Callable = None, true_labels: np.ndarray = None,
+                              graphics: bool = False, **kwargs) -> np.ndarray | None:
     """
     Run a clustering pipeline using the specified method on the provided data.
     Args:
@@ -201,9 +201,9 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
         else:
             values_to_return[1] = intra_cluster_index(data, labels)
 
-    # if extra_cluster_index is not None:
-    #     print(f"Running extra-cluster index with {extra_cluster_index.__name__}...")
-    #     values_to_return[2] = extra_cluster_index(data, labels)
+    if extra_cluster_index is not None and true_labels is not None:
+        print(f"Running extra-cluster index with {extra_cluster_index.__name__}...")
+        values_to_return[2] = extra_cluster_index(true_labels, labels)
 
     return values_to_return
 
@@ -347,6 +347,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
 
 
 def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, name_of_dataset: str = None,
+                                               target: str = None,
                                                path_to_data: str = None, drop_axes: list = None,
                                                subsample_size: int = None, clustering_methods_names: list[str] = None,
                                                graphic_clusters: bool = False, num_components: int = 2, **kwargs):
@@ -378,7 +379,27 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
     else:
         data = io.read_data(custom_path_to_data=path_to_data)
 
+    true_labels = None
+    if target is not None:
+        # Get labels
+        unique_labels = data[target].unique()
+
+        # Create a dictionary to map labels to integers
+        mapping = {label: num + 1 for num, label in enumerate(unique_labels)}
+
+        # Apply the mapping to the labels
+        true_labels = data[target].replace(mapping)
+
+    # Drop axes
+    if drop_axes is None:
+        drop_axes = []
     data = data.drop(drop_axes, axis=1)
+
+    # One hot encode labels
+    data = pd.get_dummies(data)
+    data.replace({True: 1, False: 0}, inplace=True)
+
+    data.infer_objects(copy=False)
 
     # Get subsample
     if subsample_size:
@@ -465,6 +486,7 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
                                                    distance_matrix=distance_matrix,
                                                    intra_cluster_index=cluster_metrics.calinski_harabasz_score,
                                                    extra_cluster_index=cluster_metrics.fowlkes_mallows_score,
+                                                   true_labels=true_labels,
                                                    graphics=False, **kwargs_temp)
 
                 results_intra[method.__name__][cont] = (result[1])
@@ -486,11 +508,11 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
 
     # Calculate weighted results
     weighted_results = {}
-    # for method_name in results_intra.keys():
-    #     weighted_results[method_name] = np.array(results_intra[method_name]) + np.array(results_extra[method_name])
+    for method_name in results_intra.keys():
+        weighted_results[method_name] = np.array(results_intra[method_name]) + np.array(results_extra[method_name])
 
     # Plot results in 3d graphic with each set of parameters and as z value the inter-cluster index.
-    for method_name, results in results_intra.items():
+    for method_name, results in weighted_results.items():
         param_keys = list(methods[method_name].keys())
 
         if len(param_keys) == 1:

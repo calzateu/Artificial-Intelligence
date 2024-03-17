@@ -41,7 +41,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     """
     # First step: create grid (mesh)
     array = np.linspace(0, 1, 3)
-    grid = mesh.create_mesh(array, 4)
+    grid = mesh.create_mesh(array, n=data.shape[1])
 
     distances_data_grid = dp.compute_distances((data, grid), norm, **kwargs)
 
