@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     # Parameters for mountain clustering
     kwargs["sigma_list"] = [0.5, 1, 2]
-    kwargs["beta_list"] = [0.5, 1]
+    kwargs["beta_list"] = [0.5, 1, 2]
 
     # Parameters for subtractive clustering
     kwargs["r_a_list"] = [0.5, 1, 2]
@@ -90,8 +90,8 @@ if __name__ == '__main__':
     kwargs["k_list"] = [2, 3, 4, 5, 6]
 
     # Parameters for fuzzy c-means clustering
-    kwargs["c_list"] = [2, 3, 4, 5, 6]
-    kwargs["m_list"] = [2, 3, 4, 5, 6]
+    kwargs["c_list"] = [2, 3, 4, 5]
+    kwargs["m_list"] = [1.1, 1.5, 2, 3]
 
     if run_indices:
         run_examples.run_clustering_algorithms_and_plot_indices(is_in_data_folder=is_in_data_folder,

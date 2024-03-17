@@ -484,20 +484,52 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
 
     print("Plotting results...")
 
+    # Calculate weighted results
+    weighted_results = {}
+    # for method_name in results_intra.keys():
+    #     weighted_results[method_name] = np.array(results_intra[method_name]) + np.array(results_extra[method_name])
+
     # Plot results in 3d graphic with each set of parameters and as z value the inter-cluster index.
     for method_name, results in results_intra.items():
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.set_xlabel('r_a')
-        ax.set_ylabel('r_b')
-        ax.set_zlabel('Intra-cluster index')
+        param_keys = list(methods[method_name].keys())
 
-        param_values = list(methods[method_name].values())
-        x, y = np.meshgrid((param_values[0]), param_values[1])
+        if len(param_keys) == 1:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
 
-        z = results
+            ax.set_xlabel(param_keys[0])
+            ax.set_ylabel('Extra-cluster index')
 
-        ax.scatter(x, y, z, c='r', marker='o')
+            param_values = list(methods[method_name].values())
+            x = np.array(param_values[0])
+            y = results
 
-        ax.set_title(method_name)
-        plt.show()
+            # Normalize y
+            y = (y - np.min(y)) / (np.max(y) - np.min(y))
+
+            ax.scatter(x, y, c='r', marker='o')
+
+            ax.set_title(method_name)
+            plt.show()
+
+        # If there is more than 1 parameter
+        elif len(param_keys) == 2:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+
+            ax.set_xlabel(param_keys[0])
+            ax.set_ylabel(param_keys[1])
+            ax.set_zlabel('Intra-cluster index')
+
+            param_values = list(methods[method_name].values())
+            x, y = np.meshgrid((param_values[0]), param_values[1])
+
+            z = results
+
+            # Normalize z
+            z = (z - np.min(z)) / (np.max(z) - np.min(z))
+
+            ax.scatter(x, y, z, c='r', marker='o')
+
+            ax.set_title(method_name)
+            plt.show()
