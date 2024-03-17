@@ -7,7 +7,7 @@ if __name__ == '__main__':
     num_samples = 10000
 
     # ################## Choose if you want to run clustering.                              ##################
-    run_clustering = True
+    run_clustering = False
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
@@ -21,8 +21,8 @@ if __name__ == '__main__':
     sub_sample_size = 100
 
     # Select which algorithm to use
-    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
-    clustering_methods_names = ["fuzzy c-means"]
+    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    # clustering_methods_names = ["fuzzy c-means"]
 
     # Select if you want to plot the clusters
     graphic_clusters = True
@@ -40,12 +40,14 @@ if __name__ == '__main__':
     # kwargs["norm_name"] = "cosine"
 
     # Parameters for mountain clustering
-    kwargs["sigma"] = 1
-    kwargs["beta"] = 1
+    # kwargs["sigma"] = 1
+    # kwargs["beta"] = 1
+    kwargs["sigma"] = 0.1
+    kwargs["beta"] = 2
 
     # Parameters for subtractive clustering
-    kwargs["r_a"] = 0.5
-    kwargs["r_b"] = 0.8
+    kwargs["r_a"] = 2
+    kwargs["r_b"] = 1
 
     # Parameters for k-means clustering
     kwargs["k"] = 4
@@ -55,7 +57,7 @@ if __name__ == '__main__':
     kwargs["m"] = 2
 
     # ################## Choose if you want to run distance calculations and plot graphs.   ##################
-    run_distances = False
+    run_distances = True
 
     run_examples.run_unsupervised_pipeline(generate_synthetic_data=generate_synthetic_data, num_samples=num_samples,
                                            run_clustering=run_clustering, is_in_data_folder=is_in_data_folder,
@@ -63,16 +65,21 @@ if __name__ == '__main__':
                                            drop_axes=drop_axes, subsample_size=sub_sample_size,
                                            clustering_methods_names=clustering_methods_names,
                                            graphic_clusters=graphic_clusters, num_components=num_components,
-                                           run_distances=run_distances, **kwargs)
+                                           run_distances=run_distances, save_graphs=True, **kwargs)
 
     # ################## Choose if you want to run the clustering indices.                  ##################
     run_indices = False
 
+    # Choose if the data is in the output folder
+    # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
+    is_in_data_folder, name_of_dataset, path_to_data = True, "output_centroid_labeled.csv", None
+
     # Select axes to drop from the data
-    drop_axes = ["Id", "Species"]
+    # drop_axes = ["Id", "Species"]
+    drop_axes = None
 
     # select the labels
-    target = "Species"
+    target = "label"
 
     kwargs = dict()
 
@@ -83,7 +90,11 @@ if __name__ == '__main__':
     # kwargs["norm_name"], kwargs["p"] = "p-norm", 3
     # kwargs["norm_name"] = "cosine"
 
+    # Select which algorithm to use
     clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+
+    # Select max iterations
+    kwargs["max_iter"] = 100
 
     # Select if you want to plot the clusters
     graphic_clusters = False

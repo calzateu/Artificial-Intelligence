@@ -23,7 +23,7 @@ def __calc_mountain_term(norm_value: float, constant: float) -> float:
 
 
 def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: float,
-                        graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                        graphics: bool = False, max_iterations: int = 100, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform mountain clustering on the given data.
 
@@ -33,6 +33,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
         sigma: The sigma parameter.
         beta: The beta parameter.
         graphics: Whether to display graphics. Defaults to False.
+        max_iterations: The maximum number of iterations. Defaults to 100.
 
     Returns:
         list[int]: The indices of the cluster centers.
@@ -65,6 +66,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
     distances_grid_grid = dp.compute_distances((grid, grid), norm)
 
     stop = False
+    cont = 0
     while not stop:
         m_last_center = m[last_center]
         # Subtracting scaled Gaussian function centered at the last cluster center
@@ -78,6 +80,10 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
             stop = True
         else:
             cluster_centers.append(last_center)
+
+        cont += 1
+        if cont == max_iterations:
+            break
 
     return cluster_centers, grid[cluster_centers], distances_data_grid[:, cluster_centers]
 
@@ -98,7 +104,7 @@ def __calc_density_measure(norm_value: float, constant: float) -> float:
 
 
 def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.float64], r_a: float, r_b: float,
-                           graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                           graphics: bool = False, max_iterations: int = 100, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform subtractive clustering on the given data.
 
@@ -108,6 +114,7 @@ def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.fl
         r_a: The r_a parameter.
         r_b: The r_b parameter.
         graphics: Whether to display graphics. Defaults to False.
+        max_iterations: The maximum number of iterations. Defaults to 100.
 
     Returns:
         The indices of the cluster centers.
@@ -132,6 +139,7 @@ def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.fl
     cluster_centers = [last_center]
 
     stop = False
+    cont = 0
     while not stop:
         d_last_center = d[last_center]
         # Subtract scaled Gaussian function centered at the last cluster center.
@@ -145,6 +153,10 @@ def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.fl
             stop = True
         else:
             cluster_centers.append(last_center)
+
+        cont += 1
+        if cont == max_iterations:
+            break
 
     return cluster_centers, data.iloc[cluster_centers], distance_matrix[:, cluster_centers]
 
@@ -196,7 +208,8 @@ def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, distances: np
 
 
 def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_points: np.ndarray = None,
-                       graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                       graphics: bool = False, max_iterations: int = 100,
+                       **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform k-means clustering on the given data.
 
@@ -209,6 +222,7 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
                                   the data.
         k: The number of cluster centers.
         graphics: Whether to display graphics. Defaults to False.
+        max_iterations: The maximum number of iterations. Defaults to 100.
 
     Returns:
         list[int]: The indices of the cluster centers.
@@ -248,9 +262,16 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
 
         # Update the cluster centers
         for i in range(len(center_points)):
-            center_points[i] = data_copy[clusters == i].mean()
+            # Check if the cluster is empty
+            if sum(clusters == i) == 0:
+                index = np.random.choice(data_copy.shape[0], 1, replace=False)
+                center_points[i] = data_copy[index]
+            else:
+                center_points[i] = data_copy[clusters == i].mean()
 
         cont += 1
+        if cont == max_iterations:
+            break
 
     # As we have new points, we assign them new indexes.
     nodes_index = [len(data) + i for i in range(len(center_points))]
@@ -259,7 +280,7 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
 
 
 def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: int = 2,
-                             graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                             graphics: bool = False, max_iterations: int = 100, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform fuzzy c-means clustering on the given data.
 
@@ -269,6 +290,7 @@ def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: 
         c: The number of cluster centers.
         m: The weighting exponent.
         graphics: Whether to display graphics. Defaults to False.
+        max_iterations: The maximum number of iterations. Defaults to 100.
 
     Returns:
         list[int]: The indices of the cluster centers.
@@ -320,6 +342,8 @@ def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: 
                 )
 
         cont += 1
+        if cont == max_iterations:
+            break
 
     # As we have new points, we assign them new indexes.
     nodes_index = [len(data) + i for i in range(len(center_points))]

@@ -1,5 +1,6 @@
 from constants import *
 import fuzzy_functions
+import input_output as io
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -400,7 +401,7 @@ def graph_response_surface(variable_x, variable_y, animation,
         plt.show()
 
 
-def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
+def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean", save_graphs: bool = False):
     """
     A function to generate a heatmap of the distances matrix using Seaborn and Matplotlib.
 
@@ -419,6 +420,17 @@ def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean"):
     plt.xlabel("Index")
     plt.ylabel("Index")
     plt.title(f"Distances matrix of {method_name} distance function")
+
+    if save_graphs:
+        output_path = io.__path_to_data()
+        output_dir = os.path.join(output_path, "graphics")
+
+        # Verify if the directory exists, if not, create it
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        output_image = os.path.join(output_dir, f"distances_matrix_{method_name}.png")
+        plt.savefig(output_image)
 
     # Show the plot
     plt.show()

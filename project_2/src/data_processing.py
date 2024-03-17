@@ -125,21 +125,15 @@ def label_data(data: pd.DataFrame, cluster_centers: list[int], distance_matrix: 
     return labels
 
 
-def preprocess_data(data: pd.DataFrame, subsample_size: int = None) -> pd.DataFrame:
+def preprocess_data(subsample: pd.DataFrame) -> pd.DataFrame:
     """
     Preprocess the data by standardizing it and converting it to a numpy array.
     Args:
-        data: The data to be preprocessed.
+        subsample: The data to be preprocessed.
         subsample_size: The size of the subsample to be used.
     Returns:
         The preprocessed data as a pd.DataFrame.
     """
-    # Get subsample
-    if subsample_size:
-        print(f"Getting subsample of {subsample_size} rows...")
-        subsample = get_subsample(data, subsample_size)
-    else:
-        subsample = data
 
     # Remove Nans
     subsample = subsample.dropna()

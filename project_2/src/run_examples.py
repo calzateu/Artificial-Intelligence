@@ -213,7 +213,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
                               path_to_data: str = None, drop_axes: list = None, subsample_size: int = None,
                               clustering_methods_names: list[str] = None,
                               graphic_clusters: bool = False, num_components: int = 2, run_distances: bool = False,
-                              **kwargs) -> None:
+                              save_graphs: bool = False, **kwargs) -> None:
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
@@ -230,6 +230,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         graphic_clusters (bool): Whether to graph the clusters.
         num_components (int): The number of components.
         run_distances (bool): Whether to run distance calculations.
+        save_graphs (bool): Whether to save the graphs.
 
     Returns:
         None
@@ -280,8 +281,14 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         if drop_axes is not None:
             data = data.drop(drop_axes, axis=1)
 
-        # Subsample
-        normalized_subsample = dp.preprocess_data(data, subsample_size=subsample_size)
+        # Get subsample
+        if subsample_size:
+            print(f"Getting subsample of {subsample_size} rows...")
+            subsample = dp.get_subsample(data, subsample_size)
+        else:
+            subsample = data
+
+        normalized_subsample = dp.preprocess_data(subsample)
 
         # Get the clustering methods
         if clustering_methods_names is not None:
@@ -320,24 +327,29 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         else:
             data = io.read_data(custom_path_to_data="your_path/data.csv")
 
-        # Get subsample of 100 rows
-        print("Getting subsample of 100 rows...")
-        subsample = dp.get_subsample(data, 100)
+        # Get subsample
+        if subsample_size:
+            print(f"Getting subsample of {subsample_size} rows...")
+            subsample = dp.get_subsample(data, subsample_size)
+        else:
+            subsample = data
 
         # Normalize data
-        subsample = dp.normalize(subsample)
+        subsample = dp.preprocess_data(subsample)
 
         distances_euclidean = dp.compute_distances(subsample, norms.euclidean_norm)
         distances_manhattan = dp.compute_distances(subsample, norms.manhattan_norm)
-        distances_chebyshev = dp.compute_distances(subsample, norms.p_norm, **{"p": 2})
+        distances_p_norm = dp.compute_distances(subsample, norms.p_norm, **{"p": 3})
         covariance_matrix = np.cov(subsample, rowvar=False)
         distances_mahalanobis = dp.compute_distances(subsample, norms.mahalanobis_distance,
                                                      **{"covariance_matrix": covariance_matrix})
+        distances_cosine = dp.compute_distances(subsample, norms.cosine_similarity)
 
-        gr.grap_distance_matrix(distances_euclidean, method_name="Euclidean")
-        gr.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
-        gr.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
-        gr.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis")
+        gr.grap_distance_matrix(distances_euclidean, method_name="Euclidean", save_graphs=save_graphs)
+        gr.grap_distance_matrix(distances_manhattan, method_name="Manhattan", save_graphs=save_graphs)
+        gr.grap_distance_matrix(distances_p_norm, method_name="P-norm", save_graphs=save_graphs)
+        gr.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis", save_graphs=save_graphs)
+        gr.grap_distance_matrix(distances_cosine, method_name="Cosine", save_graphs=save_graphs)
 
 
 def build_matrices(dict_results, methods):
@@ -403,23 +415,30 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
     else:
         data = io.read_data(custom_path_to_data=path_to_data)
 
+    # Get subsample
+    if subsample_size:
+        print(f"Getting subsample of {subsample_size} rows...")
+        subsample = dp.get_subsample(data, subsample_size)
+    else:
+        subsample = data
+
     true_labels = None
     if target is not None:
         # Get labels
-        unique_labels = data[target].unique()
+        unique_labels = subsample[target].unique()
 
         # Create a dictionary to map labels to integers
         mapping = {label: num + 1 for num, label in enumerate(unique_labels)}
 
         # Apply the mapping to the labels
-        true_labels = data[target].replace(mapping)
+        true_labels = subsample[target].replace(mapping)
 
     # Drop axes
     if drop_axes is None:
         drop_axes = []
-    data = data.drop(drop_axes, axis=1)
+    subsample = subsample.drop(drop_axes, axis=1)
 
-    normalized_subsample = dp.preprocess_data(data=data, subsample_size=subsample_size)
+    normalized_subsample = dp.preprocess_data(subsample=subsample)
 
     # Get the clustering methods and parameters
     methods = dict()
@@ -517,10 +536,18 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
     results_intra_normalized = dict()
     results_extra_normalized = dict()
     for method_name in results_intra.keys():
-        results_intra_normalized[method_name] = (results_intra[method_name] - results_intra[method_name].min()) / (
-                results_intra[method_name].max() - results_intra[method_name].min())
-        results_extra_normalized[method_name] = (results_extra[method_name] - results_extra[method_name].min()) / (
-                results_extra[method_name].max() - results_extra[method_name].min())
+        # Check if all the elements are the same for normalization
+        if np.all(results_intra[method_name] == results_intra[method_name][0]):
+            results_intra_normalized[method_name] = results_intra[method_name] / results_intra[method_name]
+        else:
+            results_intra_normalized[method_name] = (results_intra[method_name] - results_intra[method_name].min()) / (
+                    results_intra[method_name].max() - results_intra[method_name].min())
+
+        if np.all(results_extra[method_name] == results_extra[method_name][0]):
+            results_extra_normalized[method_name] = results_extra[method_name] / results_extra[method_name]
+        else:
+            results_extra_normalized[method_name] = (results_extra[method_name] - results_extra[method_name].min()) / (
+                    results_extra[method_name].max() - results_extra[method_name].min())
 
     # Calculate weighted results
     weighted_results = {}
