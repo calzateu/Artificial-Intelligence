@@ -4,11 +4,14 @@ import dimensionality_reduction as dr
 import fuzzy_functions
 import graphics as gr
 import input_output as io
+import itertools
 import pandas as pd
 import norms
 import numpy as np
-from typing import Callable, List, Literal, Union
+from typing import Callable
+import sklearn.metrics.cluster as cluster_metrics
 import synthetic_data as sd
+import matplotlib.pyplot as plt
 
 
 def run_system_all_chases(inputs: dict, t_norms: list[Callable], s_norms: list[Callable], defuzz_methods: list[str],
@@ -119,8 +122,9 @@ def run_graph_response_surface_all_chases(inputs: dict, x_variables: list[str], 
 
 def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, graphic_clusters: bool = False,
                               num_components: int = 2, distance_matrix: np.ndarray = None,
-                              return_center_points: bool = False,
-                              graphics: bool = False, **kwargs) -> np.ndarray | None:
+                              return_center_points: bool = False, intra_cluster_index: Callable = None,
+                              extra_cluster_index: Callable = None, graphics: bool = False,
+                              **kwargs) -> np.ndarray | None:
     """
     Run a clustering pipeline using the specified method on the provided data.
     Args:
@@ -128,6 +132,9 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
         data (pd.DataFrame): The input data for clustering.
         graphic_clusters (bool): Flag indicating whether to visualize the clusters (default False).
         num_components (int): The number of components for dimensionality reduction (default 2).
+        return_center_points (bool): Flag indicating whether to return the cluster centers (default False).
+        intra_cluster_index (Callable): The intra-cluster index function to use.
+        extra_cluster_index (Callable): The extra-cluster index function to use.
         distance_matrix (np.ndarray): The distance matrix.
         graphics (bool): Flag indicating whether to visualize the clustering results (default False).
     Returns:
@@ -183,8 +190,22 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
     # End of pipeline
     print()
 
+    values_to_return = [None]*3
     if return_center_points:
-        return center_points
+        values_to_return[0] = center_points
+
+    if intra_cluster_index is not None:
+        print(f"Running intra-cluster index with {intra_cluster_index.__name__}...")
+        if len(set(labels)) <= 1:
+            values_to_return[1] = 0
+        else:
+            values_to_return[1] = intra_cluster_index(data, labels)
+
+    # if extra_cluster_index is not None:
+    #     print(f"Running extra-cluster index with {extra_cluster_index.__name__}...")
+    #     values_to_return[2] = extra_cluster_index(data, labels)
+
+    return values_to_return
 
 
 def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples: int = 10000,
@@ -323,3 +344,160 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         gr.grap_distance_matrix(distances_manhattan, method_name="Manhattan")
         gr.grap_distance_matrix(distances_chebyshev, method_name="Chebyshev")
         gr.grap_distance_matrix(distances_mahalanobis, method_name="Mahalanobis")
+
+
+def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, name_of_dataset: str = None,
+                                               path_to_data: str = None, drop_axes: list = None,
+                                               subsample_size: int = None, clustering_methods_names: list[str] = None,
+                                               graphic_clusters: bool = False, num_components: int = 2, **kwargs):
+    print("Running clustering analysis with clustering indices...")
+
+    # Choose norm
+    norm_name = kwargs["norm_name"]
+
+    if norm_name == "euclidean":
+        norm = norms.euclidean_norm
+    elif norm_name == "manhattan":
+        norm = norms.manhattan_norm
+    elif norm_name == "p-norm":
+        norm = norms.p_norm
+        p = kwargs.get("p", None)
+        if p is None:
+            print(f"Parameter p not specified. Using p-norm with p = {kwargs.get('p', 3)}")
+            kwargs["p"] = 3
+    elif norm_name == "mahalanobis":
+        norm = norms.mahalanobis_distance
+    elif norm_name == "cosine":
+        norm = norms.cosine_similarity
+    else:
+        raise ValueError(f"Norm {norm_name} not recognized.")
+
+    # Read data
+    if is_in_data_folder:
+        data = io.read_data(filename=name_of_dataset)
+    else:
+        data = io.read_data(custom_path_to_data=path_to_data)
+
+    data = data.drop(drop_axes, axis=1)
+
+    # Get subsample
+    if subsample_size:
+        subsample_size = len(data)
+        print(f"Getting subsample of {subsample_size} rows...")
+        subsample = dp.get_subsample(data, subsample_size)
+    else:
+        subsample = data
+
+    # Get the clustering methods and parameters
+    methods = dict()
+    if clustering_methods_names is not None:
+        for method_name in clustering_methods_names:
+            if method_name == "mountain":
+                sigmas = kwargs["sigma_list"]
+                betas = kwargs["beta_list"]
+                methods[clustering.mountain_clustering] = {"sigmas": sigmas, "betas": betas}
+                methods[clustering.mountain_clustering.__name__] = {"sigmas": sigmas, "betas": betas}
+                print(f"Loaded mountain clustering with sigmas = {sigmas} and betas = {betas}.")
+            elif method_name == "subtractive":
+                r_as = kwargs["r_a_list"]
+                r_bs = kwargs["r_b_list"]
+                methods[clustering.subtractive_clustering] = {"r_as": r_as, "r_bs": r_bs}
+                methods[clustering.subtractive_clustering.__name__] = {"r_as": r_as, "r_bs": r_bs}
+                print(f"Loaded subtractive clustering with r_as = {r_as} and r_bs = {r_bs}.")
+            elif method_name == "k-means":
+                ks = kwargs["k_list"]
+                methods[clustering.k_means_clustering] = {"ks": ks}
+                methods[clustering.k_means_clustering.__name__] = {"ks": ks}
+                print(f"Loaded k-means clustering with ks = {ks}.")
+            elif method_name == "fuzzy c-means":
+                cs = kwargs["c_list"]
+                ms = kwargs["m_list"]
+                methods[clustering.fuzzy_c_means_clustering] = {"cs": cs, "ms": ms}
+                methods[clustering.fuzzy_c_means_clustering.__name__] = {"cs": cs, "ms": ms}
+                print(f"Loaded fuzzy c-means clustering with cs = {cs} and ms = {ms}.")
+            else:
+                raise ValueError(f"Clustering method {method_name} not recognized."
+                                 f"Try 'mountain', 'subtractive', 'k-means', or 'fuzzy c-means'.")
+
+    else:
+        raise ValueError("Clustering methods and parameters not specified.")
+
+    print()
+
+    # Normalize data with min-max normalization.
+    normalized_subsample = dp.normalize(subsample)
+
+    distance_matrix = dp.compute_distances(data=normalized_subsample, norm=norm, **kwargs)
+
+    # Initialize dictionaries to store results
+    results_intra = dict()
+    results_extra = dict()
+
+    # Go through the methods and their parameters and save the results.
+    for method, params in methods.items():
+        if not isinstance(method, str):
+            param_combinations = list(itertools.product(*params.values()))
+            size = len(param_combinations)
+
+            # Verify the number of parameters
+            if len(params.values()) == 2:
+                param_values = list(params.values())
+                num_rows = len(param_values[0])
+                num_cols = len(param_values[1])
+            else:
+                num_rows = size
+                num_cols = 1
+
+            results_intra[method.__name__] = [0] * (len(param_combinations))
+            results_extra[method.__name__] = [0] * (len(param_combinations))
+            cont = 0
+            for combination in param_combinations:
+                kwargs_temp = {param[:-1]: value for param, value in zip(params.keys(), combination)}
+
+                # Call the method with the corresponding parameters
+                print(f"Running {method.__name__} with params: {kwargs_temp}")
+
+                # Don't return the center points.
+                kwargs_temp["return_center_points"] = False
+
+                result = __run_clustering_pipeline(clustering_method=method, data=normalized_subsample,
+                                                   graphic_clusters=graphic_clusters, num_components=num_components,
+                                                   distance_matrix=distance_matrix,
+                                                   intra_cluster_index=cluster_metrics.calinski_harabasz_score,
+                                                   extra_cluster_index=cluster_metrics.fowlkes_mallows_score,
+                                                   graphics=False, **kwargs_temp)
+
+                results_intra[method.__name__][cont] = (result[1])
+                results_extra[method.__name__][cont] = (result[2])
+                print(f"Done with {method.__name__} with params: {kwargs_temp} and \n"
+                      f"got inter-cluster index: {result[1]} and extra-cluster index: {result[2]}.")
+
+                # Store results for plotting
+                print("Combination: ", combination)
+
+                cont += 1
+
+            results_intra[method.__name__] = np.array(results_intra[method.__name__]).reshape((num_rows, num_cols))
+            results_extra[method.__name__] = np.array(results_extra[method.__name__]).reshape((num_rows, num_cols))
+
+    print("Done running clustering pipeline.")
+
+    print("Plotting results...")
+
+    # Plot results in 3d graphic with each set of parameters and as z value the inter-cluster index.
+    for method_name, results in results_intra.items():
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlabel('r_a')
+        ax.set_ylabel('r_b')
+        ax.set_zlabel('Intra-cluster index')
+
+        param_values = list(methods[method_name].values())
+        x, y = np.meshgrid((param_values[0]), param_values[1])
+
+        z = results
+
+        ax.scatter(x, y, z, c='r', marker='o')
+
+        ax.set_title(method_name)
+        plt.show()
