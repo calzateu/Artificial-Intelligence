@@ -22,6 +22,15 @@ You can find the following projects in this repository:
 
 Each project folder contains detailed instructions, code samples, and resources related to that specific project.
 
+## Python Environment
+
+To run the code in this repository, you will need to have Python 3.9+ installed on your machine. You can install the dependencies in the `requirements.txt` file. Use the following commands:
+
+```
+python -m venv .venv
+pip install -r requirements.txt
+```
+
 ## Contributing
 
 We welcome contributions from the community to make this repository a valuable resource for everyone. If you have suggestions, bug fixes, or would like to add your own AI project related to the course, please follow these steps:
