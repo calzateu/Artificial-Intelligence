@@ -47,5 +47,5 @@ Please ensure your code follows the repository's coding standards and includes a
 
 ## License
 
-This repository is licensed under the [MIT License](LICENSE). Feel free to use the code and resources for your educational and personal projects.
+This repository is licensed under the [MIT License](https://github.com/calzateu/Artificial-Intelligence/blob/main/LICENSE). Feel free to use the code and resources for your educational and personal projects.
 
