@@ -7,7 +7,7 @@ if __name__ == '__main__':
     num_samples = 10000
 
     # ################## Choose if you want to run clustering.                              ##################
-    run_clustering = False
+    run_clustering = True
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     graphic_clusters = True
 
     # Select number of components for dimensionality reduction. Only used if graphic_clusters is True
-    num_components = 2
+    num_components = 3
 
     kwargs = dict()
 
@@ -42,19 +42,19 @@ if __name__ == '__main__':
     # Parameters for mountain clustering
     # kwargs["sigma"] = 1
     # kwargs["beta"] = 1
-    kwargs["sigma"] = 0.1
-    kwargs["beta"] = 2
+    kwargs["sigma"] = 2
+    kwargs["beta"] = 1
 
     # Parameters for subtractive clustering
-    kwargs["r_a"] = 2
-    kwargs["r_b"] = 1
+    kwargs["r_a"] = 0.5
+    kwargs["r_b"] = 0.5
 
     # Parameters for k-means clustering
-    kwargs["k"] = 4
+    kwargs["k"] = 2
 
     # Parameters for fuzzy c-means clustering
-    kwargs["c"] = 4
-    kwargs["m"] = 2
+    kwargs["c"] = 2
+    kwargs["m"] = 1.1
 
     # ################## Choose if you want to run distance calculations and plot graphs.   ##################
     run_distances = False
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                                            run_distances=run_distances, save_graphs=True, **kwargs)
 
     # ################## Choose if you want to run the clustering indices.                  ##################
-    run_indices = True
+    run_indices = False
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"

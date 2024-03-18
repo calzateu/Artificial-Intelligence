@@ -509,7 +509,8 @@ def graph_clustering_results(data: pd.DataFrame, cluster_centers: list[int], cen
 
 def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cluster_centers: list[int],
                                                    center_points_by_method: list[np.ndarray], labels: np.array,
-                                                   plot_names: list[str], axes_names: list[str] = None):
+                                                   plot_names: list[str], axes_names: list[str] = None,
+                                                   save_graphs: bool = False, method_name: str = None):
     """
     Visualizes clustering results based on the data points, cluster centers, and cluster labels for multiple datasets.
 
@@ -537,6 +538,17 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
             ax = fig.add_subplot(1, num_plots, idx + 1)
 
         plot_clusters(data, cluster_centers, center_points, labels, axes_names, plot_name, ax)
+
+    if save_graphs:
+        output_path = io.__path_to_data()
+        output_dir = os.path.join(output_path, "graphics")
+
+        # Verify if the directory exists, if not, create it
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        output_image = os.path.join(output_dir, f"clustering_results_{method_name}.png")
+        plt.savefig(output_image)
 
     plt.show()
 

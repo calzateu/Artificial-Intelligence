@@ -185,7 +185,8 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
                                                            principal_df_umap], cluster_centers,
                                                           [transformed_cen_points_pca,
                                                            transformed_cen_points_tsne, transformed_cen_points_umap],
-                                                          labels, plot_names, axes)
+                                                          labels, plot_names, axes, save_graphs=True,
+                                                          method_name=clustering_method.__name__)
 
     # End of pipeline
     print()
@@ -316,6 +317,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
             __run_clustering_pipeline(clustering_method=clustering_method, data=normalized_subsample,
                                       graphic_clusters=graphic_clusters, num_components=num_components,
                                       distance_matrix=distance_matrix, return_center_points=False, graphics=False,
+                                      save_graphs=save_graphs,
                                       **kwargs)
 
     if run_distances:

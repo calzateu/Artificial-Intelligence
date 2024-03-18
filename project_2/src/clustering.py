@@ -280,7 +280,8 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
 
 
 def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: int = 2,
-                             graphics: bool = False, max_iterations: int = 100, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                             graphics: bool = False, max_iterations: int = 100, save_graphs: bool = False,
+                             **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
     """
     Perform fuzzy c-means clustering on the given data.
 
