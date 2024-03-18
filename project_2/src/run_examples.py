@@ -473,6 +473,12 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
                 methods[clustering.fuzzy_c_means_clustering] = {"cs": cs, "ms": ms}
                 methods[clustering.fuzzy_c_means_clustering.__name__] = {"cs": cs, "ms": ms}
                 print(f"Loaded fuzzy c-means clustering with cs = {cs} and ms = {ms}.")
+            elif method_name == "db scan":
+                eps = kwargs["eps_list"]
+                min_samples = kwargs["min_pts_list"]
+                methods[clustering.dbscan_clustering] = {"epss": eps, "min_ptss": min_samples}
+                methods[clustering.dbscan_clustering.__name__] = {"epss": eps, "min_ptss": min_samples}
+                print(f"Loaded db scan clustering with eps = {eps} and min_samples = {min_samples}.")
             else:
                 raise ValueError(f"Clustering method {method_name} not recognized."
                                  f"Try 'mountain', 'subtractive', 'k-means', or 'fuzzy c-means'.")

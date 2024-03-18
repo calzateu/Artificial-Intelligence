@@ -7,7 +7,7 @@ if __name__ == '__main__':
     num_samples = 10000
 
     # ################## Choose if you want to run clustering.                              ##################
-    run_clustering = True
+    run_clustering = False
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
@@ -72,7 +72,7 @@ if __name__ == '__main__':
                                            run_distances=run_distances, save_graphs=True, **kwargs)
 
     # ################## Choose if you want to run the clustering indices.                  ##################
-    run_indices = False
+    run_indices = True
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
@@ -95,7 +95,8 @@ if __name__ == '__main__':
     # kwargs["norm_name"] = "cosine"
 
     # Select which algorithm to use
-    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    clustering_methods_names = ["db scan"]
 
     # Select max iterations
     kwargs["max_iter"] = 100
@@ -120,6 +121,12 @@ if __name__ == '__main__':
     # Parameters for fuzzy c-means clustering
     kwargs["c_list"] = [2, 3, 4, 5]
     kwargs["m_list"] = [1.1, 1.5, 2, 3]
+
+    # Parameters for DBSCAN clustering
+    # kwargs["eps_list"] = [0.2, 0.5, 0.8]
+    # kwargs["min_pts_list"] = [5, 7, 9]
+    kwargs["eps_list"] = [0.5, 0.9, 1.2]
+    kwargs["min_pts_list"] = [5, 7, 9]
 
     if run_indices:
         run_examples.run_clustering_algorithms_and_plot_indices(is_in_data_folder=is_in_data_folder,

@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
 
 # Read the CSV file
-data = pd.read_csv("../data/output_centroid.csv")
+data = pd.read_csv("../data/output_centroid_labeled.csv")
 
 # Initialize the PolynomialFeatures object
 poly = PolynomialFeatures(degree=2, include_bias=False)
