@@ -401,38 +401,40 @@ def graph_response_surface(variable_x, variable_y, animation,
         plt.show()
 
 
-def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean", save_graphs: bool = False):
+def grap_distance_matrix(distances: np.ndarray, method_name: str = "euclidean", save_graphs: bool = False,
+                         x_labels=None, y_labels=None, x_name: str = "", y_name: str = "") -> None:
     """
     A function to generate a heatmap of the distances matrix using Seaborn and Matplotlib.
 
     Parameters:
         distances (np.ndarray): The input distances matrix.
         method_name (str): The name of the distance function (default is "euclidean").
+        x_labels (list or None): List of labels for the x-axis.
+        y_labels (list or None): List of labels for the y-axis.
 
     Returns:
         None
     """
-    # Heatmap of the distances matrix using Seaborn and Matplotlib.
     plt.figure(figsize=(8, 6))
-    sns.heatmap(distances, cmap="YlGnBu", fmt=".1f", linewidths=.5)
+    if x_labels is not None:
+        sns.heatmap(distances, cmap="YlGnBu", fmt=".1f", linewidths=.5, xticklabels=x_labels, yticklabels=y_labels)
+        plt.xlabel(f"Parameter {x_name}")
+    else:
+        sns.heatmap(distances, cmap="YlGnBu", fmt=".1f", linewidths=.5, yticklabels=y_labels)
 
-    # Add labels
-    plt.xlabel("Index")
-    plt.ylabel("Index")
-    plt.title(f"Distances matrix of {method_name} distance function")
+    plt.ylabel(f"Parameter {y_name}")
+    plt.title(f"Parameters matrix of {method_name} distance function")
 
     if save_graphs:
         output_path = io.__path_to_data()
         output_dir = os.path.join(output_path, "graphics")
 
-        # Verify if the directory exists, if not, create it
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         output_image = os.path.join(output_dir, f"distances_matrix_{method_name}.png")
         plt.savefig(output_image)
 
-    # Show the plot
     plt.show()
 
 
@@ -539,7 +541,7 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
     plt.show()
 
 
-def plot_indices(dict_results, methods):
+def plot_indices(dict_results, methods, save_graphs: bool = False):
     for method_name, results in dict_results.items():
         param_keys = list(methods[method_name].keys())
 
@@ -547,7 +549,7 @@ def plot_indices(dict_results, methods):
 
         if len(param_keys) == 1:
             plt.xlabel(param_keys[0])
-            plt.ylabel('Index')
+            plt.ylabel('Weighted indices')
 
             param_values = list(methods[method_name].values())
             x = np.array(param_values[0])
@@ -557,6 +559,17 @@ def plot_indices(dict_results, methods):
             # y = (y - np.min(y)) / (np.max(y) - np.min(y))
 
             plt.scatter(x, y, c=y, cmap='viridis', marker='o')
+
+            if save_graphs:
+                output_path = io.__path_to_data()
+                output_dir = os.path.join(output_path, "graphics")
+
+                # Verify if the directory exists, if not, create it
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+
+                output_image = os.path.join(output_dir, f"parameter_exploration_{method_name}.png")
+                plt.savefig(output_image)
 
         elif len(param_keys) == 2:
             ax = fig.add_subplot(111, projection='3d')
@@ -572,6 +585,17 @@ def plot_indices(dict_results, methods):
             # z = (z - np.min(z)) / (np.max(z) - np.min(z))
 
             ax.scatter(x, y, z, c=z, cmap='viridis', marker='o')
+
+            if save_graphs:
+                output_path = io.__path_to_data()
+                output_dir = os.path.join(output_path, "graphics")
+
+                # Verify if the directory exists, if not, create it
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+
+                output_image = os.path.join(output_dir, f"parameter_exploration_{method_name}.png")
+                plt.savefig(output_image)
 
         plt.title(method_name)
         plt.show()

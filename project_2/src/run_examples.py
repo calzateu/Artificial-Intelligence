@@ -386,7 +386,8 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
                                                target: str = None,
                                                path_to_data: str = None, drop_axes: list = None,
                                                subsample_size: int = None, clustering_methods_names: list[str] = None,
-                                               graphic_clusters: bool = False, num_components: int = 2, **kwargs):
+                                               graphic_clusters: bool = False, num_components: int = 2,
+                                               save_graphs: bool = False, **kwargs):
     print("Running clustering analysis with clustering indices...")
 
     # Choose norm
@@ -556,25 +557,57 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
             results_extra_normalized[method_name])
 
     # Plot results in 3d graphic with each set of parameters and as z value the inter-cluster index.
-    gr.plot_indices(weighted_results, methods)
+    gr.plot_indices(weighted_results, methods, save_graphs)
 
-    matrices_intra = build_matrices(results_intra, methods)
-    for matrix in matrices_intra:
-        print(f"Intra cluster indices for method {matrix[0]}:")
-        if len(matrix[0][0]) > 1:
-            print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
+    for method_name, results in weighted_results.items():
+        keys = list(methods[method_name].keys())
+        values = list(methods[method_name].values())
+        if len(values) == 2:
+            gr.grap_distance_matrix(results, method_name+" weighted indices", save_graphs, x_labels=values[0],
+                                    y_labels=values[1], x_name=keys[0][:-1], y_name=keys[1][:-1])
         else:
-            print(tabulate.tabulate(matrix[1], tablefmt="fancy_grid"))
-        # print(tabulate.tabulate(matrix[1:], headers=matrix[1][0], tablefmt="latex_raw"))
+            gr.grap_distance_matrix(results, method_name+" weighted indices", save_graphs, y_labels=values[0],
+                                    y_name=keys[0][:-1])
 
-    matrices_extra = build_matrices(results_extra, methods)
-    for matrix in matrices_extra:
-        print(f"Extra cluster indices for method {matrix[0]}:")
-        if len(matrix[0][0]) > 1:
-            print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
+    for method_name, results in results_intra.items():
+        keys = list(methods[method_name].keys())
+        values = list(methods[method_name].values())
+        if len(values) == 2:
+            gr.grap_distance_matrix(results, method_name+" intra indices", save_graphs, x_labels=values[0],
+                                    y_labels=values[1], x_name=keys[0][:-1], y_name=keys[1][:-1])
         else:
-            print(tabulate.tabulate(matrix[1], tablefmt="fancy_grid"))
-        # print(tabulate.tabulate(matrix[1:], headers=matrix[1][0], tablefmt="latex_raw"))
+            gr.grap_distance_matrix(results, method_name+" intra indices", save_graphs, y_labels=values[0],
+                                    y_name=keys[0][:-1])
+
+    for method_name, results in results_extra.items():
+        keys = list(methods[method_name].keys())
+        values = list(methods[method_name].values())
+        if len(values) == 2:
+            gr.grap_distance_matrix(results, method_name+" extra indices", save_graphs, x_labels=values[0],
+                                    y_labels=values[1], x_name=keys[0][:-1], y_name=keys[1][:-1])
+        else:
+            gr.grap_distance_matrix(results, method_name+" extra indices", save_graphs, y_labels=values[0],
+                                    y_name=keys[0][:-1])
+
+    # matrices_intra = build_matrices(results_intra, methods)
+    # for matrix in matrices_intra:
+    #     print(f"Intra cluster indices for method {matrix[0]}:")
+    #     if len(matrix[0][0]) > 1:
+    #         # print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
+    #         print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="latex"))
+    #     else:
+    #         # print(tabulate.tabulate(matrix[1], tablefmt="fancy_grid"))
+    #         print(tabulate.tabulate(matrix[1], tablefmt="latex"))
+    #
+    # matrices_extra = build_matrices(results_extra, methods)
+    # for matrix in matrices_extra:
+    #     print(f"Extra cluster indices for method {matrix[0]}:")
+    #     if len(matrix[0][0]) > 1:
+    #         # print(tabulate.tabulate(matrix[1][1:], headers=matrix[1][0], tablefmt="fancy_grid"))
+    #         print(tabulate.tabulate(matrix[1], headers=matrix[1][0], tablefmt="latex"))
+    #     else:
+    #         # print(tabulate.tabulate(matrix[1], tablefmt="fancy_grid"))
+    #         print(tabulate.tabulate(matrix[1], tablefmt="latex"))
 
     print("Done plotting results.")
 

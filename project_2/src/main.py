@@ -57,7 +57,7 @@ if __name__ == '__main__':
     kwargs["m"] = 2
 
     # ################## Choose if you want to run distance calculations and plot graphs.   ##################
-    run_distances = True
+    run_distances = False
 
     run_examples.run_unsupervised_pipeline(generate_synthetic_data=generate_synthetic_data, num_samples=num_samples,
                                            run_clustering=run_clustering, is_in_data_folder=is_in_data_folder,
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                                            run_distances=run_distances, save_graphs=True, **kwargs)
 
     # ################## Choose if you want to run the clustering indices.                  ##################
-    run_indices = False
+    run_indices = True
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
@@ -125,4 +125,5 @@ if __name__ == '__main__':
                                                                 subsample_size=sub_sample_size,
                                                                 clustering_methods_names=clustering_methods_names,
                                                                 graphic_clusters=graphic_clusters,
-                                                                num_components=num_components, **kwargs)
+                                                                num_components=num_components,
+                                                                save_graphs=True, **kwargs)
