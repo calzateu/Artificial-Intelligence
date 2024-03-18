@@ -21,8 +21,8 @@ if __name__ == '__main__':
     sub_sample_size = 100
 
     # Select which algorithm to use
-    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
-    # clustering_methods_names = ["fuzzy c-means"]
+    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    clustering_methods_names = ["db scan"]
 
     # Select if you want to plot the clusters
     graphic_clusters = True
@@ -55,6 +55,10 @@ if __name__ == '__main__':
     # Parameters for fuzzy c-means clustering
     kwargs["c"] = 2
     kwargs["m"] = 1.1
+
+    # Parameters for DBSCAN clustering
+    kwargs["eps"] = 0.5
+    kwargs["min_pts"] = 7
 
     # ################## Choose if you want to run distance calculations and plot graphs.   ##################
     run_distances = False

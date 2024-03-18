@@ -23,7 +23,8 @@ def __calc_mountain_term(norm_value: float, constant: float) -> float:
 
 
 def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: float,
-                        graphics: bool = False, max_iterations: int = 100, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                        graphics: bool = False, max_iterations: int = 100,
+                        **kwargs) -> tuple[list[int], np.ndarray, np.ndarray, None]:
     """
     Perform mountain clustering on the given data.
 
@@ -39,6 +40,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
         list[int]: The indices of the cluster centers.
         np.ndarray: The cluster centers (data points).
         np.ndarray: The distance matrix between the data points and the cluster centers.
+        None
     """
     # First step: create grid (mesh)
     array = np.linspace(0, 1, 3)
@@ -85,7 +87,7 @@ def mountain_clustering(data: pd.DataFrame, norm: Callable, sigma: float, beta: 
         if cont == max_iterations:
             break
 
-    return cluster_centers, grid[cluster_centers], distances_data_grid[:, cluster_centers]
+    return cluster_centers, grid[cluster_centers], distances_data_grid[:, cluster_centers], None
 
 
 def __calc_density_measure(norm_value: float, constant: float) -> float:
@@ -104,7 +106,8 @@ def __calc_density_measure(norm_value: float, constant: float) -> float:
 
 
 def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.float64], r_a: float, r_b: float,
-                           graphics: bool = False, max_iterations: int = 100, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                           graphics: bool = False, max_iterations: int = 100,
+                           **kwargs) -> tuple[list[int], np.ndarray, np.ndarray, None]:
     """
     Perform subtractive clustering on the given data.
 
@@ -120,6 +123,7 @@ def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.fl
         The indices of the cluster centers.
         The cluster centers (data points).
         The distance matrix between the data points and the cluster centers.
+        None
     """
     # First step: construct density function.
     number_of_points = len(data)
@@ -158,7 +162,7 @@ def subtractive_clustering(data: pd.DataFrame, distance_matrix: np.ndarray[np.fl
         if cont == max_iterations:
             break
 
-    return cluster_centers, data.iloc[cluster_centers], distance_matrix[:, cluster_centers]
+    return cluster_centers, data.iloc[cluster_centers], distance_matrix[:, cluster_centers], None
 
 
 def __calc_cost(data: np.ndarray, clusters: np.ndarray, distances: np.ndarray) -> float:
@@ -209,7 +213,7 @@ def assign_clusters(data: np.ndarray, cluster_centers: np.ndarray, distances: np
 
 def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_cluster_points: np.ndarray = None,
                        graphics: bool = False, max_iterations: int = 100,
-                       **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                       **kwargs) -> tuple[list[int], np.ndarray, np.ndarray, None]:
     """
     Perform k-means clustering on the given data.
 
@@ -228,6 +232,7 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
         list[int]: The indices of the cluster centers.
         np.ndarray: The cluster centers (data points).
         np.ndarray: The distance matrix between the data points and the cluster centers.
+        None
     """
     # Create a copy of the data
     data_copy = data.copy()
@@ -276,12 +281,12 @@ def k_means_clustering(data: pd.DataFrame, norm: Callable, k: int = 4, initial_c
     # As we have new points, we assign them new indexes.
     nodes_index = [len(data) + i for i in range(len(center_points))]
 
-    return nodes_index, center_points, distances
+    return nodes_index, center_points, distances, None
 
 
 def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: int = 2,
                              graphics: bool = False, max_iterations: int = 100, save_graphs: bool = False,
-                             **kwargs) -> tuple[list[int], np.ndarray, np.ndarray]:
+                             **kwargs) -> tuple[list[int], np.ndarray, np.ndarray, None]:
     """
     Perform fuzzy c-means clustering on the given data.
 
@@ -297,6 +302,7 @@ def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: 
         list[int]: The indices of the cluster centers.
         np.ndarray: The cluster centers (data points).
         np.ndarray: The distance matrix between the data points and the cluster centers.
+        None
     """
     # Create a copy of the data
     data_copy = data.copy()
@@ -350,4 +356,73 @@ def fuzzy_c_means_clustering(data: pd.DataFrame, norm: Callable, c: int = 4, m: 
     nodes_index = [len(data) + i for i in range(len(center_points))]
 
     # TODO: return distance or membership matrix?
-    return nodes_index, center_points, distance_matrix
+    return nodes_index, center_points, distance_matrix, None
+
+
+def dbscan_clustering(data: pd.DataFrame, norm: Callable, eps: float, min_pts: int,
+                      graphics: bool = False, **kwargs) -> tuple[list[int], np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Perform DBSCAN clustering on the given data.
+
+    Args:
+        data: The input data for clustering.
+        norm: The normalization function.
+        eps: The epsilon parameter defining the maximum distance between two samples for them to be considered as
+             in the same neighborhood.
+        min_pts: The number of samples in a neighborhood for a point to be considered as a core point.
+        graphics: Whether to display graphics. Defaults to False.
+
+    Returns:
+        list[int]: The indices of the core points.
+        np.ndarray: The core points (data points).
+        np.ndarray: The distance matrix between the data points and the core points.
+        np.ndarray: The cluster labels for each data point.
+    """
+    distance_matrix = dp.compute_distances(data, norm, **kwargs)
+
+    # Step 1: Find core points
+    core_points = []
+    for i in range(len(data)):
+        neighbors = np.where(distance_matrix[i] <= eps)[0]
+        if len(neighbors) >= min_pts:
+            core_points.append(i)
+
+    # Step 2: Expand clusters from core points
+    cluster_labels = np.full(len(data), -1)  # Initialize cluster labels, -1 for noise points
+    current_cluster = 0
+
+    for i in core_points:
+        if cluster_labels[i] == -1:
+            cluster_labels[i] = current_cluster
+            expand_cluster(i, core_points, cluster_labels, distance_matrix, eps, min_pts, current_cluster)
+
+            current_cluster += 1
+
+    if graphics:
+        # Visualize clusters or core points if needed
+        pass
+
+    return core_points, data.iloc[core_points], distance_matrix, cluster_labels
+
+
+def expand_cluster(point_index: int, core_points: list[int], cluster_labels: np.ndarray, distance_matrix: np.ndarray,
+                   eps: float, min_pts: int, current_cluster: int):
+    """
+    Expand the cluster from a core point.
+
+    Args:
+        point_index: Index of the core point to expand from.
+        core_points: List of core point indices.
+        cluster_labels: Array containing cluster labels for each data point.
+        distance_matrix: The distance matrix between data points.
+        eps: The epsilon parameter defining the maximum distance between two samples for them to be considered as
+             in the same neighborhood.
+        min_pts: The number of samples in a neighborhood for a point to be considered as a core point.
+        current_cluster: The index of the current cluster.
+    """
+    neighbors = np.where(distance_matrix[point_index] <= eps)[0]
+    for neighbor in neighbors:
+        if cluster_labels[neighbor] == -1:
+            cluster_labels[neighbor] = current_cluster
+            if neighbor in core_points:
+                expand_cluster(neighbor, core_points, cluster_labels, distance_matrix, eps, min_pts, current_cluster)

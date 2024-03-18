@@ -145,16 +145,17 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
         distance_matrix = dp.compute_distances((data, data), norms.euclidean_norm)
 
     # Run clustering method.
-    cluster_centers, center_points, distances_data_to_centers = clustering_method(
+    cluster_centers, center_points, distances_data_to_centers, labels = clustering_method(
         data=data, norm=norms.euclidean_norm, distance_matrix=distance_matrix, graphics=graphics, **kwargs
     )
 
     print(f"Found {len(cluster_centers)} cluster centers with {clustering_method.__name__}:")
     print(cluster_centers)
 
-    # Label data
-    print("Labeling data...")
-    labels = dp.label_data(data, cluster_centers, distances_data_to_centers)
+    if labels is None:
+        # Label data
+        print("Labeling data...")
+        labels = dp.label_data(data, cluster_centers, distances_data_to_centers)
 
     # Run dimensionality reduction for PCA, t-SNE, and UMAP.
     if graphic_clusters:
@@ -303,6 +304,8 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
                     clustering_methods.append(clustering.k_means_clustering)
                 elif method_name == "fuzzy c-means":
                     clustering_methods.append(clustering.fuzzy_c_means_clustering)
+                elif method_name == "db scan":
+                    clustering_methods.append(clustering.dbscan_clustering)
                 else:
                     raise ValueError(f"Clustering method {method_name} not recognized."
                                      f"Try 'mountain', 'subtractive', 'k-means', or 'fuzzy c-means'.")
