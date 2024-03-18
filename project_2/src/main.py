@@ -1,4 +1,5 @@
 import run_examples
+import sklearn.metrics.cluster as cluster_metrics
 
 
 if __name__ == '__main__':
@@ -7,25 +8,28 @@ if __name__ == '__main__':
     num_samples = 10000
 
     # ################## Choose if you want to run clustering.                              ##################
-    run_clustering = False
+    run_clustering = True
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
-    is_in_data_folder, name_of_dataset, path_to_data = True, "output_centroid.csv", None
+    is_in_data_folder, name_of_dataset, path_to_data = True, "output_centroid_poly.csv", None
 
     # Select axes to drop from the data
     # drop_axes = ["Id", "Species"]
-    drop_axes = None
+    drop_axes = "label"
+
+    # select the labels
+    target = "label"
 
     # Select subsample size
     sub_sample_size = 100
 
     # Select which algorithm to use
-    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
-    clustering_methods_names = ["db scan"]
+    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means", "db scan"]
+    # clustering_methods_names = ["db scan"]
 
     # Select if you want to plot the clusters
-    graphic_clusters = True
+    graphic_clusters = False
 
     # Select number of components for dimensionality reduction. Only used if graphic_clusters is True
     num_components = 3
@@ -58,7 +62,7 @@ if __name__ == '__main__':
 
     # Parameters for DBSCAN clustering
     kwargs["eps"] = 0.5
-    kwargs["min_pts"] = 7
+    kwargs["min_pts"] = 9
 
     # ################## Choose if you want to run distance calculations and plot graphs.   ##################
     run_distances = False
@@ -69,10 +73,13 @@ if __name__ == '__main__':
                                            drop_axes=drop_axes, subsample_size=sub_sample_size,
                                            clustering_methods_names=clustering_methods_names,
                                            graphic_clusters=graphic_clusters, num_components=num_components,
-                                           run_distances=run_distances, save_graphs=True, **kwargs)
+                                           run_distances=run_distances, save_graphs=True,
+                                           intra_cluster_index=cluster_metrics.calinski_harabasz_score,
+                                           extra_cluster_index=cluster_metrics.fowlkes_mallows_score, target=target,
+                                           **kwargs)
 
     # ################## Choose if you want to run the clustering indices.                  ##################
-    run_indices = True
+    run_indices = False
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"

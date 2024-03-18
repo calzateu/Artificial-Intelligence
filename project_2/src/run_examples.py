@@ -203,9 +203,13 @@ def __run_clustering_pipeline(clustering_method: Callable, data: pd.DataFrame, g
         else:
             values_to_return[1] = intra_cluster_index(data, labels)
 
+        print(values_to_return[1])
+
     if extra_cluster_index is not None and true_labels is not None:
         print(f"Running extra-cluster index with {extra_cluster_index.__name__}...")
         values_to_return[2] = extra_cluster_index(true_labels, labels)
+
+        print(values_to_return[2])
 
     return values_to_return
 
@@ -215,7 +219,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
                               path_to_data: str = None, drop_axes: list = None, subsample_size: int = None,
                               clustering_methods_names: list[str] = None,
                               graphic_clusters: bool = False, num_components: int = 2, run_distances: bool = False,
-                              save_graphs: bool = False, **kwargs) -> None:
+                              save_graphs: bool = False, target: str = None, **kwargs) -> None:
     """
     A function to run an unsupervised pipeline with options to generate synthetic data and calculate distances.
 
@@ -233,6 +237,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         num_components (int): The number of components.
         run_distances (bool): Whether to run distance calculations.
         save_graphs (bool): Whether to save the graphs.
+        target (str): The target variable.
 
     Returns:
         None
@@ -279,16 +284,28 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
         else:
             data = io.read_data(custom_path_to_data=path_to_data)
 
-        # Drop axes
-        if drop_axes is not None:
-            data = data.drop(drop_axes, axis=1)
-
         # Get subsample
         if subsample_size:
             print(f"Getting subsample of {subsample_size} rows...")
             subsample = dp.get_subsample(data, subsample_size)
         else:
             subsample = data
+
+        true_labels = None
+        if target is not None:
+            print("Getting true labels...")
+            # Get labels
+            unique_labels = subsample[target].unique()
+
+            # Create a dictionary to map labels to integers
+            mapping = {label: num + 1 for num, label in enumerate(unique_labels)}
+
+            # Apply the mapping to the labels
+            true_labels = subsample[target].replace(mapping)
+
+        # Drop axes
+        if drop_axes is not None:
+            data = data.drop(drop_axes, axis=1)
 
         normalized_subsample = dp.preprocess_data(subsample)
 
@@ -320,7 +337,7 @@ def run_unsupervised_pipeline(generate_synthetic_data: bool = False, num_samples
             __run_clustering_pipeline(clustering_method=clustering_method, data=normalized_subsample,
                                       graphic_clusters=graphic_clusters, num_components=num_components,
                                       distance_matrix=distance_matrix, return_center_points=False, graphics=False,
-                                      save_graphs=save_graphs,
+                                      save_graphs=save_graphs, true_labels=true_labels,
                                       **kwargs)
 
     if run_distances:
