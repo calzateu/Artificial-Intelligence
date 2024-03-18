@@ -28,6 +28,7 @@ To run the code in this repository, you will need to have Python 3.9+ installed 
 
 ```
 python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
