@@ -17,8 +17,8 @@ This repository is dedicated to storing code and materials related to the Artifi
 
 You can find the following projects in this repository:
 
-- [Project 1](https://github.com/calzateu/Artificial-Intelligence/tree/main/project_1): Description of project 1.
-- [Project 2](https://github.com/calzateu/Artificial-Intelligence/tree/main/project_2): Description of project 2.
+- [Project 1](https://github.com/calzateu/Artificial-Intelligence/tree/main/project_1): fuzzy inference system based on expert knowledge in the field of fraudulent transactions.
+- [Project 2](https://github.com/calzateu/Artificial-Intelligence/tree/main/project_2): unsupervised learning with clustering algorithm codes from scratch.
 
 Each project folder contains detailed instructions, code samples, and resources related to that specific project.
 
