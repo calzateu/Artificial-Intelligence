@@ -591,8 +591,8 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
         keys = list(methods[method_name].keys())
         values = list(methods[method_name].values())
         if len(values) == 2:
-            gr.grap_distance_matrix(results, method_name+" weighted indices", save_graphs, x_labels=values[0],
-                                    y_labels=values[1], x_name=keys[0][:-1], y_name=keys[1][:-1])
+            gr.grap_distance_matrix(results, method_name+" weighted indices", save_graphs, x_labels=values[1],
+                                    y_labels=values[0], x_name=keys[1][:-1], y_name=keys[0][:-1])
         else:
             gr.grap_distance_matrix(results, method_name+" weighted indices", save_graphs, y_labels=values[0],
                                     y_name=keys[0][:-1])
@@ -601,8 +601,8 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
         keys = list(methods[method_name].keys())
         values = list(methods[method_name].values())
         if len(values) == 2:
-            gr.grap_distance_matrix(results, method_name+" intra indices", save_graphs, x_labels=values[0],
-                                    y_labels=values[1], x_name=keys[0][:-1], y_name=keys[1][:-1])
+            gr.grap_distance_matrix(results, method_name+" intra indices", save_graphs, x_labels=values[1],
+                                    y_labels=values[0], x_name=keys[1][:-1], y_name=keys[0][:-1])
         else:
             gr.grap_distance_matrix(results, method_name+" intra indices", save_graphs, y_labels=values[0],
                                     y_name=keys[0][:-1])
@@ -611,8 +611,8 @@ def run_clustering_algorithms_and_plot_indices(is_in_data_folder: bool = True, n
         keys = list(methods[method_name].keys())
         values = list(methods[method_name].values())
         if len(values) == 2:
-            gr.grap_distance_matrix(results, method_name+" extra indices", save_graphs, x_labels=values[0],
-                                    y_labels=values[1], x_name=keys[0][:-1], y_name=keys[1][:-1])
+            gr.grap_distance_matrix(results, method_name+" extra indices", save_graphs, x_labels=values[1],
+                                    y_labels=values[0], x_name=keys[1][:-1], y_name=keys[0][:-1])
         else:
             gr.grap_distance_matrix(results, method_name+" extra indices", save_graphs, y_labels=values[0],
                                     y_name=keys[0][:-1])

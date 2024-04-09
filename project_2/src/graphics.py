@@ -541,7 +541,7 @@ def graph_clustering_results_for_multiple_datasets(datas: list[pd.DataFrame], cl
 
     if save_graphs:
         output_path = io.__path_to_data()
-        output_dir = os.path.join(output_path, "graphics")
+        output_dir = os.path.join(output_path, "graphics/dimensionality_augmentation")
 
         # Verify if the directory exists, if not, create it
         if not os.path.exists(output_dir):

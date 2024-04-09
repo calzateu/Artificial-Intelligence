@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # Choose if the data is in the output folder
     # is_in_data_folder, name_of_dataset, path_to_data = False, None, "your_path/data.csv"
-    is_in_data_folder, name_of_dataset, path_to_data = True, "output_centroid_poly.csv", None
+    is_in_data_folder, name_of_dataset, path_to_data = True, "output_centroid_labeled.csv", None
 
     # Select axes to drop from the data
     # drop_axes = ["Id", "Species"]
@@ -25,11 +25,12 @@ if __name__ == '__main__':
     sub_sample_size = 100
 
     # Select which algorithm to use
-    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means", "db scan"]
-    # clustering_methods_names = ["db scan"]
+    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means", "db scan"]
+    # clustering_methods_names = ["fuzzy c-means", "db scan"]
+    clustering_methods_names = ["mountain"]
 
     # Select if you want to plot the clusters
-    graphic_clusters = False
+    graphic_clusters = True
 
     # Select number of components for dimensionality reduction. Only used if graphic_clusters is True
     num_components = 3
@@ -61,8 +62,8 @@ if __name__ == '__main__':
     kwargs["m"] = 1.1
 
     # Parameters for DBSCAN clustering
-    kwargs["eps"] = 0.5
-    kwargs["min_pts"] = 9
+    kwargs["eps"] = 1.2
+    kwargs["min_pts"] = 5
 
     # ################## Choose if you want to run distance calculations and plot graphs.   ##################
     run_distances = False
@@ -102,8 +103,8 @@ if __name__ == '__main__':
     # kwargs["norm_name"] = "cosine"
 
     # Select which algorithm to use
-    # clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
-    clustering_methods_names = ["db scan"]
+    clustering_methods_names = ["mountain", "subtractive", "k-means", "fuzzy c-means"]
+    # clustering_methods_names = ["db scan"]
 
     # Select max iterations
     kwargs["max_iter"] = 100
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     # Parameters for DBSCAN clustering
     # kwargs["eps_list"] = [0.2, 0.5, 0.8]
     # kwargs["min_pts_list"] = [5, 7, 9]
-    kwargs["eps_list"] = [0.5, 0.9, 1.2]
+    kwargs["eps_list"] = [0.2, 0.5, 0.9, 1.2]
     kwargs["min_pts_list"] = [5, 7, 9]
 
     if run_indices:
