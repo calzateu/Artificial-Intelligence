@@ -24,4 +24,4 @@ class Neuron:
         v = self.__linear_combination(inputs)
         delta = error * self.__activation_derivative(v)
         weight_deltas = learning_rate * np.dot(delta, inputs)
-        self.weights += weight_deltas
+        self.weights -= weight_deltas

@@ -28,7 +28,8 @@ def gradient_descent(X, y, w, learning_rate, epochs):
     for _ in range(epochs):
         v = local_camp(X, w)
         y_pred = activation_function(v)
-        grad = np.dot(y_pred - y, X)  # Ver de dónde se obtiene en el pdf adjunto
+        # grad = np.dot(y_pred - y, X)  # Ver de dónde se obtiene en el pdf adjunto
+        grad = np.dot((-y / y_pred + (1 - y) / (1 - y_pred)) * derivative_activation_function(v), X)
         print(grad)
         w = w - learning_rate * grad
 

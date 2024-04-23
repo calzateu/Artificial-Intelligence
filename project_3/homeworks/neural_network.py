@@ -15,6 +15,9 @@ class Layer:
         # Binary cross entropy loss
         return -(targets * np.log(self.forwarded_inputs) + (1 - targets) * np.log(1 - self.forwarded_inputs))
 
+    def derivate_output_error(self, targets):
+        return - targets / self.forwarded_inputs + (1 - targets) / (1 - self.forwarded_inputs)
+
     def update_neurons(self, input_data, output_error, learning_rate):
         # for neuron, error in zip(self.neurons, output_error):
         #     neuron.update_weights(input_data, error, learning_rate)
@@ -49,7 +52,9 @@ class NeuralNetwork:
         return output
 
     def backward(self, input_data, targets):
-        output_error = self.layers[-1].calculate_output_error(targets)
+        # output_error = self.layers[-1].calculate_output_error(targets)
+        # output_error = - targets / self.forward(input_data) + (1 - targets) / (1 - self.forward(input_data))
+        derivative_output_error = self.layers[-1].derivate_output_error(targets)
         #for i in reversed(range(len(self.layers) - 1)):
         for i in [len(self.layers) - 1]:
             if i == 0:
@@ -57,7 +62,7 @@ class NeuralNetwork:
             else:
                 input_data_backward = self.layers[i - 1].forwarded_inputs
             layer = self.layers[i]
-            layer.update_neurons(input_data_backward, output_error, self.learning_rate)
+            layer.update_neurons(input_data_backward, derivative_output_error, self.learning_rate)
 
 
 # neural_network = NeuralNetwork(n_inputs=1, hidden_layers=[10, 10], n_outputs=1, learning_rate=0.01)
@@ -78,4 +83,3 @@ for i in range(1000):
 
 print(neural_network.layers)
 print(neural_network.forward(input))
-
