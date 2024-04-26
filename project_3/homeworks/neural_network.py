@@ -15,13 +15,24 @@ class Layer:
         # Binary cross entropy loss
         return -(targets * np.log(self.forwarded_inputs) + (1 - targets) * np.log(1 - self.forwarded_inputs))
 
-    def derivate_output_error(self, targets):
+    def derivate_output_error_cross_entropy(self, targets):
+        # If dimensions don't match then throw an error
+        if targets.shape != self.forwarded_inputs.shape:
+            raise ValueError("The dimensions of the targets and the output of the layer don't match.")
+        # Derivative of binary cross entropy loss
         return - targets / self.forwarded_inputs + (1 - targets) / (1 - self.forwarded_inputs)
+
+    def derivate_output_error_mse(self, targets):
+        # If dimensions don't match then throw an error
+        if targets.shape != self.forwarded_inputs.shape:
+            raise ValueError("The dimensions of the targets and the output of the layer don't match.")
+        # Derivative of mean squared error
+        return self.forwarded_inputs - targets
 
     def update_neurons(self, input_data, output_error, learning_rate):
         # for neuron, error in zip(self.neurons, output_error):
         #     neuron.update_weights(input_data, error, learning_rate)
-        error = sum(output_error)
+        error = np.sum(output_error, axis=1)
         for neuron in self.neurons:
             neuron.update_weights(input_data, error, learning_rate)
 
@@ -52,10 +63,11 @@ class NeuralNetwork:
         return output
 
     def backward(self, input_data, targets):
-        # output_error = self.layers[-1].calculate_output_error(targets)
-        # output_error = - targets / self.forward(input_data) + (1 - targets) / (1 - self.forward(input_data))
-        derivative_output_error = self.layers[-1].derivate_output_error(targets)
-        #for i in reversed(range(len(self.layers) - 1)):
+        # derivative_output_error = self.layers[-1].derivate_output_error_cross_entropy(targets)
+        derivative_output_error = self.layers[-1].derivate_output_error_mse(targets)
+
+        sum_output_error = np.sum(derivative_output_error, axis=1)
+        # for i in reversed(range(len(self.layers) - 1)):
         for i in [len(self.layers) - 1]:
             if i == 0:
                 input_data_backward = input_data
@@ -63,23 +75,3 @@ class NeuralNetwork:
                 input_data_backward = self.layers[i - 1].forwarded_inputs
             layer = self.layers[i]
             layer.update_neurons(input_data_backward, derivative_output_error, self.learning_rate)
-
-
-# neural_network = NeuralNetwork(n_inputs=1, hidden_layers=[10, 10], n_outputs=1, learning_rate=0.01)
-# input = [1]
-
-neural_network = NeuralNetwork(n_inputs=2, hidden_layers=[2], n_outputs=1, learning_rate=0.01)
-input = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-targets = np.array([[0], [1], [1], [0]])
-# input = np.array([0, 1])
-# targets = np.array([0])
-
-print(neural_network.layers)
-print(neural_network.forward(input))
-
-for i in range(1000):
-    neural_network.forward(input)
-    neural_network.backward(input, targets)
-
-print(neural_network.layers)
-print(neural_network.forward(input))
