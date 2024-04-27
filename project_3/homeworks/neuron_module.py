@@ -2,8 +2,9 @@ import numpy as np
 
 
 class Neuron:
-    def __init__(self, n_inputs, n_outputs):
+    def __init__(self, n_inputs):
         self.weights = np.random.rand(n_inputs)
+        self.forwarded_inputs = None
 
     def __linear_combination(self, inputs):
         return np.dot(inputs, self.weights)
@@ -18,10 +19,10 @@ class Neuron:
         return
 
     def forward(self, inputs):
-        return self.__activation(self.__linear_combination(inputs))
+        self.forwarded_inputs = self.__activation(self.__linear_combination(inputs))
+        return self.forwarded_inputs
 
     def update_weights(self, inputs, error, learning_rate):
-        v = self.__linear_combination(inputs)
-        delta = error * self.__activation_derivative(v)
+        delta = error * self.forwarded_inputs
         weight_deltas = learning_rate * np.dot(delta, inputs)
         self.weights -= weight_deltas

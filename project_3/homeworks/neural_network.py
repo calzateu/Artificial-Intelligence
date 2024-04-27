@@ -3,11 +3,13 @@ import numpy as np
 
 
 class Layer:
-    def __init__(self, n_neurons=1, n_inputs=1, n_outputs=1):
-        self.neurons = [nm.Neuron(n_inputs, n_outputs) for _ in range(n_neurons)]
+    def __init__(self, n_neurons=1, n_inputs=1):
+        self.neurons = [nm.Neuron(n_inputs) for _ in range(n_neurons)]
         self.forwarded_inputs = None
+        self.inputs = None
 
     def forward(self, inputs):
+        self.inputs = inputs
         self.forwarded_inputs = np.array([neuron.forward(inputs) for neuron in self.neurons]).T
         return self.forwarded_inputs
 
@@ -29,49 +31,46 @@ class Layer:
         # Derivative of mean squared error
         return self.forwarded_inputs - targets
 
-    def update_neurons(self, input_data, output_error, learning_rate):
+    def update_neurons(self, output_error, learning_rate):
         # for neuron, error in zip(self.neurons, output_error):
         #     neuron.update_weights(input_data, error, learning_rate)
         error = np.sum(output_error, axis=1)
         for neuron in self.neurons:
-            neuron.update_weights(input_data, error, learning_rate)
+            neuron.update_weights(self.inputs, error, learning_rate)
 
 
 class NeuralNetwork:
     def __init__(self, n_inputs=1, hidden_layers=None, n_outputs=1, learning_rate=0.01):
         # Initialize input layer
-        self.layers = [Layer(n_neurons=n_inputs, n_inputs=n_inputs, n_outputs=1)]
+        self.layers = [Layer(n_neurons=n_inputs, n_inputs=n_inputs)]
 
         if hidden_layers is None:
             hidden_layers = []
         hidden_layers = [n_inputs] + hidden_layers
 
         # Initialize hidden layers
-        self.layers += [Layer(n_neurons=hidden_layers[i+1], n_inputs=hidden_layers[i], n_outputs=1)
+        self.layers += [Layer(n_neurons=hidden_layers[i+1], n_inputs=hidden_layers[i])
                         for i in range(len(hidden_layers) - 1)]
 
         # Initialize output layer
-        self.layers += [Layer(n_neurons=n_outputs, n_inputs=hidden_layers[-1], n_outputs=1)]
+        self.layers += [Layer(n_neurons=n_outputs, n_inputs=hidden_layers[-1])]
 
         self.learning_rate = learning_rate
 
     def forward(self, inputs):
         output = inputs
         for layer in self.layers:
+            # We pass the output of the previous layer as the input to the current layer
             output = layer.forward(output)
 
         return output
 
-    def backward(self, input_data, targets):
+    def backward(self, targets):
         # derivative_output_error = self.layers[-1].derivate_output_error_cross_entropy(targets)
         derivative_output_error = self.layers[-1].derivate_output_error_mse(targets)
 
         sum_output_error = np.sum(derivative_output_error, axis=1)
         # for i in reversed(range(len(self.layers) - 1)):
         for i in [len(self.layers) - 1]:
-            if i == 0:
-                input_data_backward = input_data
-            else:
-                input_data_backward = self.layers[i - 1].forwarded_inputs
             layer = self.layers[i]
-            layer.update_neurons(input_data_backward, derivative_output_error, self.learning_rate)
+            layer.update_neurons(derivative_output_error, self.learning_rate)

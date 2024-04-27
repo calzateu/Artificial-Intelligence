@@ -16,7 +16,7 @@ print(neural_network.forward(input))
 
 for i in range(1000):
     neural_network.forward(input)
-    neural_network.backward(input, targets)
+    neural_network.backward(targets)
 
 print(neural_network.layers)
 print(neural_network.forward(input))
