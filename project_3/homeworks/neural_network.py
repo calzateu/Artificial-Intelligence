@@ -2,6 +2,9 @@ import neuron_module as nm
 import numpy as np
 
 
+def cost_mse(targets, outputs):
+    return 1/2*(outputs - targets)**2
+
 class Layer:
     def __init__(self, n_neurons=1, n_inputs=1):
         self.neurons = [nm.Neuron(n_inputs) for _ in range(n_neurons)]
@@ -67,6 +70,9 @@ class Layer:
         for i, neuron in enumerate(self.neurons):
             neuron.update_weights(self.inputs, local_gradients_l[i], learning_rate)
 
+        for i, neuron in enumerate(self.neurons):
+            self.weights[:, i:i + 1] = neuron.weights
+
 
 class NeuralNetwork:
     def __init__(self, n_inputs=1, hidden_layers=None, n_outputs=1, learning_rate=0.01):
@@ -95,12 +101,8 @@ class NeuralNetwork:
         return output
 
     def backward(self, targets):
-        # derivative_output_error = self.layers[-1].derivate_output_error_cross_entropy(targets)
-        # derivative_output_error = self.layers[-1].derivate_output_error_mse(targets)
-
         local_gradients = self.layers[-1].local_gradient_last_layer(targets)
         for i in reversed(range(len(self.layers))):
-        # for i in [len(self.layers) - 1]:
             if i != len(self.layers) - 1:
                 w = self.layers[i+1].weights
                 local_gradients = self.layers[i].local_gradient_hidden_layer(w, local_gradients)
@@ -109,3 +111,10 @@ class NeuralNetwork:
             layer.update_neurons(local_gradients, self.learning_rate)
 
         return self.layers[-1].calculate_output_error_mse(targets)
+
+    def score(self, inputs, targets):
+        error = 0
+        for i in range(len(inputs)):
+            self.forward(inputs[i])
+            error += cost_mse(targets[i], self.layers[-1].forwarded_inputs)
+        return error
