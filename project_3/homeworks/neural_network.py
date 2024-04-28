@@ -7,6 +7,11 @@ class Layer:
         self.neurons = [nm.Neuron(n_inputs) for _ in range(n_neurons)]
         self.forwarded_inputs = None
         self.inputs = None
+        self.local_gradients = None
+        self.weights = np.zeros((n_inputs, n_neurons))
+
+        for i, neuron in enumerate(self.neurons):
+            self.weights[:, i:i + 1] = neuron.weights
 
     def forward(self, inputs):
         self.inputs = inputs
@@ -37,11 +42,30 @@ class Layer:
         # Derivative of mean squared error
         return self.forwarded_inputs - targets
 
-    def update_neurons(self, output_error, learning_rate):
-        # for neuron, error in zip(self.neurons, output_error):
-        #     neuron.update_weights(input_data, error, learning_rate)
+    def derivative_activation(self, z):
+        return z * (1 - z)
+
+    def local_gradient_last_layer(self, targets):
+        # Calculate local gradient
+        cost_derivative = self.derivate_output_error_mse(targets)
+        self.local_gradients = np.zeros(len(self.neurons))
         for i, neuron in enumerate(self.neurons):
-            neuron.update_weights(self.inputs, output_error[i], learning_rate)
+            self.local_gradients[i] = cost_derivative[i] * self.derivative_activation(self.forwarded_inputs[i])
+
+        return self.local_gradients
+
+    def local_gradient_hidden_layer(self, w_l, local_gradient_l):
+        # Calculate local gradient
+        self.local_gradients = np.dot(w_l, local_gradient_l)
+        for i, neuron in enumerate(self.neurons):
+            self.local_gradients[i] *= self.derivative_activation(self.forwarded_inputs[i])
+
+        # self.local_gradients = self.local_gradients.reshape(len(self.local_gradients), 1)
+        return self.local_gradients
+
+    def update_neurons(self, local_gradients_l, learning_rate):
+        for i, neuron in enumerate(self.neurons):
+            neuron.update_weights(self.inputs, local_gradients_l[i], learning_rate)
 
 
 class NeuralNetwork:
@@ -72,11 +96,16 @@ class NeuralNetwork:
 
     def backward(self, targets):
         # derivative_output_error = self.layers[-1].derivate_output_error_cross_entropy(targets)
-        derivative_output_error = self.layers[-1].derivate_output_error_mse(targets)
+        # derivative_output_error = self.layers[-1].derivate_output_error_mse(targets)
 
-        # for i in reversed(range(len(self.layers) - 1)):
-        for i in [len(self.layers) - 1]:
+        local_gradients = self.layers[-1].local_gradient_last_layer(targets)
+        for i in reversed(range(len(self.layers))):
+        # for i in [len(self.layers) - 1]:
+            if i != len(self.layers) - 1:
+                w = self.layers[i+1].weights
+                local_gradients = self.layers[i].local_gradient_hidden_layer(w, local_gradients)
+
             layer = self.layers[i]
-            layer.update_neurons(derivative_output_error, self.learning_rate)
+            layer.update_neurons(local_gradients, self.learning_rate)
 
         return self.layers[-1].calculate_output_error_mse(targets)

@@ -24,8 +24,7 @@ class Neuron:
         forwarded_inputs = self.__activation(linear_combination)
         return forwarded_inputs
 
-    def update_weights(self, inputs, error, learning_rate):
-        delta = error * self.activation_derivative_inputs
-        weight_deltas = learning_rate * inputs * delta
+    def update_weights(self, inputs, local_gradient, learning_rate):
+        weight_deltas = learning_rate * local_gradient * inputs
         weight_deltas = weight_deltas.reshape(len(weight_deltas), 1)
         self.weights -= weight_deltas
