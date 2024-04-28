@@ -1,8 +1,6 @@
 import numpy as np
 import neural_network as nn
 
-np.random.seed(0)
-
 neural_network = nn.NeuralNetwork(n_inputs=2, hidden_layers=[2], n_outputs=1, learning_rate=1)
 
 input = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
