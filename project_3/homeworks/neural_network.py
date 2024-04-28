@@ -10,33 +10,38 @@ class Layer:
 
     def forward(self, inputs):
         self.inputs = inputs
-        self.forwarded_inputs = np.array([neuron.forward(inputs) for neuron in self.neurons]).T
+        self.forwarded_inputs = np.zeros(len(self.neurons))
+        for i, neuron in enumerate(self.neurons):
+            self.forwarded_inputs[i] = neuron.forward(inputs)
         return self.forwarded_inputs
 
-    def calculate_output_error(self, targets):
+    def calculate_output_error_cross_entropy(self, targets):
         # Binary cross entropy loss
         return -(targets * np.log(self.forwarded_inputs) + (1 - targets) * np.log(1 - self.forwarded_inputs))
+
+    def calculate_output_error_mse(self, targets):
+        # Mean squared error
+        return 1/2*(self.forwarded_inputs - targets)**2
 
     def derivate_output_error_cross_entropy(self, targets):
         # If dimensions don't match then throw an error
         if targets.shape != self.forwarded_inputs.shape:
-            raise ValueError("The dimensions of the targets and the output of the layer don't match.")
+            raise ValueError(f"The dimensions of the targets and the output of the layer don't match {targets.shape} != {self.forwarded_inputs.shape}.")
         # Derivative of binary cross entropy loss
         return - targets / self.forwarded_inputs + (1 - targets) / (1 - self.forwarded_inputs)
 
     def derivate_output_error_mse(self, targets):
         # If dimensions don't match then throw an error
         if targets.shape != self.forwarded_inputs.shape:
-            raise ValueError("The dimensions of the targets and the output of the layer don't match.")
+            raise ValueError(f"The dimensions of the targets and the output of the layer don't match {targets.shape} != {self.forwarded_inputs.shape}.")
         # Derivative of mean squared error
         return self.forwarded_inputs - targets
 
     def update_neurons(self, output_error, learning_rate):
         # for neuron, error in zip(self.neurons, output_error):
         #     neuron.update_weights(input_data, error, learning_rate)
-        error = np.sum(output_error, axis=1)
-        for neuron in self.neurons:
-            neuron.update_weights(self.inputs, error, learning_rate)
+        for i, neuron in enumerate(self.neurons):
+            neuron.update_weights(self.inputs, output_error[i], learning_rate)
 
 
 class NeuralNetwork:
@@ -69,8 +74,9 @@ class NeuralNetwork:
         # derivative_output_error = self.layers[-1].derivate_output_error_cross_entropy(targets)
         derivative_output_error = self.layers[-1].derivate_output_error_mse(targets)
 
-        sum_output_error = np.sum(derivative_output_error, axis=1)
         # for i in reversed(range(len(self.layers) - 1)):
         for i in [len(self.layers) - 1]:
             layer = self.layers[i]
             layer.update_neurons(derivative_output_error, self.learning_rate)
+
+        return self.layers[-1].calculate_output_error_mse(targets)
