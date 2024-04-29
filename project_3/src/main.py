@@ -5,8 +5,16 @@ import pandas as pd
 
 
 def main():
+
+    # Set experiment parameters
+    n_inputs = 3
     n_outputs = 2
-    neural_network = nn.NeuralNetwork(n_inputs=3, hidden_layers=[2], n_outputs=n_outputs, learning_rate=1)
+    hidden_layers = [2]
+    epochs = 10
+    learning_rate = 1
+
+    neural_network = nn.NeuralNetwork(n_inputs=n_inputs, hidden_layers=hidden_layers, n_outputs=n_outputs,
+                                      learning_rate=learning_rate)
 
     # Data for testing the neural network with the XOR function
     # inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
@@ -31,7 +39,6 @@ def main():
 
     print("Score before training: ", neural_network.score(inputs, targets))
 
-    epochs = 10
     save_local_gradients = True
     errors = neural_network.train(inputs, targets, epochs=epochs, save_local_gradients=save_local_gradients)
 
