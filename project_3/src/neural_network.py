@@ -5,6 +5,7 @@ import numpy as np
 
 class Layer:
     def __init__(self, n_neurons=1, n_inputs=1):
+        self.n_neurons = n_neurons
         self.neurons = [nm.Neuron(n_inputs) for _ in range(n_neurons)]
         self.forwarded_inputs = None
         self.inputs = None
@@ -16,7 +17,7 @@ class Layer:
 
     def forward(self, inputs):
         self.inputs = inputs
-        self.forwarded_inputs = np.zeros(len(self.neurons))
+        self.forwarded_inputs = np.zeros(self.n_neurons)
         for i, neuron in enumerate(self.neurons):
             self.forwarded_inputs[i] = neuron.forward(inputs)
         return self.forwarded_inputs
@@ -24,7 +25,7 @@ class Layer:
     def local_gradient_last_layer(self, targets):
         # Calculate local gradient
         cost_derivative = ca.derivate_output_error_mse(targets, self.forwarded_inputs)
-        self.local_gradients = np.zeros(len(self.neurons))
+        self.local_gradients = np.zeros(self.n_neurons)
         for i, neuron in enumerate(self.neurons):
             self.local_gradients[i] = cost_derivative[i] * ca.derivative_activation(self.forwarded_inputs[i])
 
@@ -49,6 +50,7 @@ class Layer:
 
 class NeuralNetwork:
     def __init__(self, n_inputs=1, hidden_layers=None, n_outputs=1, learning_rate=0.01):
+        self.n_outputs = n_outputs
         # Initialize input layer
         self.layers = [Layer(n_neurons=n_inputs, n_inputs=n_inputs)]
 
@@ -91,3 +93,14 @@ class NeuralNetwork:
             self.forward(inputs[i])
             error += ca.calculate_output_error_mse(targets[i], self.layers[-1].forwarded_inputs)
         return error
+
+    def train(self, inputs, targets, epochs=1):
+        indices = np.arange(len(inputs))
+        outputs = np.zeros((len(inputs), self.n_outputs))
+        for i in range(epochs):
+            np.random.shuffle(indices)
+            for j in indices:
+                outputs[j] = self.forward(inputs[j])
+                error = self.backward(targets[j])
+
+        return outputs

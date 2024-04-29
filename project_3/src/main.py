@@ -24,13 +24,7 @@ targets = data_copy[['X3', 'X4']].to_numpy()
 
 print("Score: ", neural_network.score(inputs, targets))
 
-outputs = np.zeros((len(inputs), n_outputs))
-indices = np.array(range(len(inputs)))
-for i in range(50):
-    np.random.shuffle(indices)
-    for j in indices:
-        outputs[j] = neural_network.forward(inputs[j])
-        error = neural_network.backward(targets[j])
+outputs = neural_network.train(inputs, targets, epochs=50)
 
 print("Score: ", neural_network.score(inputs, targets))
 
