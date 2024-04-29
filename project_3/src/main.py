@@ -1,28 +1,41 @@
+import data_processing as dp
 import numpy as np
 import neural_network as nn
+import pandas as pd
 
-neural_network = nn.NeuralNetwork(n_inputs=2, hidden_layers=[2], n_outputs=1, learning_rate=1)
+n_outputs = 2
+neural_network = nn.NeuralNetwork(n_inputs=3, hidden_layers=[2], n_outputs=n_outputs, learning_rate=1)
 
-input = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-targets = np.array([[0], [1], [1], [1]])
+# inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+# targets = np.array([[0], [1], [1], [1]])
 # targets = np.array([[0, 1], [1, 0], [0, 1], [1, 0]])
-# input = np.array([[0, 0]])
+# inputs = np.array([[0, 0]])
 # targets = np.array([[0]])
 
+data = pd.read_csv("../data/data.csv")
 
-print("Score: ", neural_network.score(input, targets))
+print(data.head())
 
-outputs = np.zeros(len(input))
-indices = np.array(range(len(input)))
-for i in range(6000):
+data_copy = data.copy()
+data_copy = dp.preprocess_data(data_copy)
+
+inputs = data_copy[['X0', 'X1', 'X2']].to_numpy()
+targets = data_copy[['X3', 'X4']].to_numpy()
+
+print("Score: ", neural_network.score(inputs, targets))
+
+outputs = np.zeros((len(inputs), n_outputs))
+indices = np.array(range(len(inputs)))
+for i in range(50):
     np.random.shuffle(indices)
     for j in indices:
-        outputs[j] = neural_network.forward(input[j])
+        outputs[j] = neural_network.forward(inputs[j])
         error = neural_network.backward(targets[j])
 
-    if i % 100 == 0:
-        print("Iteration: ", i, outputs)
+print("Score: ", neural_network.score(inputs, targets))
 
-print(outputs)
+print(data_copy.head())
 
-print("Score: ", neural_network.score(input, targets))
+observations = [0, 1, 2, 900]
+for observation in observations:
+    print(f"Target at observation {observation}: {targets[observation]} and output: {outputs[observation]}")
