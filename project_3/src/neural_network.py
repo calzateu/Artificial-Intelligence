@@ -101,7 +101,10 @@ class NeuralNetwork:
 
         final_error = ca.calculate_output_error_mse(targets, self.layers[-1].forwarded_inputs)
 
-        return final_error
+        local_gradients_last_layer = self.layers[-1].local_gradient_last_layer(targets)
+        mean_of_local_gradients = np.mean(np.abs(local_gradients_last_layer), axis=0)
+
+        return final_error, mean_of_local_gradients
 
     def score(self, inputs, targets):
         error = 0
@@ -110,7 +113,7 @@ class NeuralNetwork:
             error += ca.calculate_output_error_mse(targets[i], self.layers[-1].forwarded_inputs)
         return error
 
-    def train(self, inputs, targets, epochs=1, save_local_gradients=False):
+    def train(self, inputs, targets, epochs=1, save_local_gradients=False, tolerance=0.001):
         indices = np.arange(len(inputs))
 
         # Used to store the errors for each row of each epoch
@@ -123,13 +126,27 @@ class NeuralNetwork:
                 layer.local_gradients_matrix = np.zeros((number_of_rows, layer.n_neurons))
 
         cont = 0
-        for i in range(epochs):
+        stop = False
+        epochs_completed = 0
+        while epochs_completed < epochs:
+            print(f"Epoch {epochs_completed + 1}/{epochs}")
             np.random.shuffle(indices)
             for j in indices:
                 self.forward(inputs[j])
 
                 # Backpropagation
-                errors[cont] = self.backward(targets[j], save_local_gradients, cont)
+                errors[cont], mean_of_local_gradients = self.backward(targets[j], save_local_gradients, cont)
                 cont += 1
 
-        return errors
+                if mean_of_local_gradients < tolerance:
+                    stop = True
+                    break
+
+            if stop:
+                break
+
+            epochs_completed += 1
+
+        number_of_data = epochs_completed * len(indices)
+
+        return errors[:number_of_data], epochs_completed

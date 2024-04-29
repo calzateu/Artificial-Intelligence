@@ -39,8 +39,9 @@ def plot_errors(epochs, errors, number_of_data_points):
     plt.show()
 
 
-def plot_local_gradients(neural_network, epochs, number_of_data_points):
-    epochs_list = [i * number_of_data_points for i in range(epochs)]
+def plot_local_gradients(neural_network, epochs_trained, number_of_data_points):
+    epochs_list = [i * number_of_data_points for i in range(epochs_trained)]
+    number_of_rows = epochs_trained * number_of_data_points
 
     for i in range(neural_network.n_layers):
         print(f"Plotting local gradients for layer {i + 1}...")
@@ -49,10 +50,11 @@ def plot_local_gradients(neural_network, epochs, number_of_data_points):
             ax[j].set_title(f"Local gradient for neuron {j + 1} in layer {i + 1}")
             ax[j].set_ylabel("Local gradient")
             ax[j].set_xlabel("Data point index")
-            ax[j].plot(neural_network.layers[i].local_gradients_matrix[:, j])
 
-            ax[j].vlines(x=epochs_list, ymin=min(neural_network.layers[i].local_gradients_matrix[:, j]),
-                         ymax=max(neural_network.layers[i].local_gradients_matrix[:, j]), colors='r',
+            local_gradient = neural_network.layers[i].local_gradients_matrix[:number_of_rows, j]
+            ax[j].plot(local_gradient)
+
+            ax[j].vlines(x=epochs_list, ymin=min(local_gradient), ymax=max(local_gradient), colors='r',
                          linestyles='dashed', label="Epochs")
 
         plt.show()
@@ -67,7 +69,7 @@ def plot_local_gradients(neural_network, epochs, number_of_data_points):
         ax[i].set_ylabel("Local gradient")
         ax[i].set_xlabel("Data point index")
 
-        means = np.mean(neural_network.layers[i].local_gradients_matrix, axis=1)
+        means = np.mean(neural_network.layers[i].local_gradients_matrix[:number_of_rows], axis=1)
         ax[i].plot(means)
 
         min_lim = min(min_lim, min(means))

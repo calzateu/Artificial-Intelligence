@@ -10,8 +10,10 @@ def main():
     n_inputs = 3
     n_outputs = 2
     hidden_layers = [2]
-    epochs = 10
+    epochs = 50
     learning_rate = 1
+    # Tolerance for the mean of the local gradients. If the mean is below this value, the training is stopped
+    tolerance = 0.001
 
     neural_network = nn.NeuralNetwork(n_inputs=n_inputs, hidden_layers=hidden_layers, n_outputs=n_outputs,
                                       learning_rate=learning_rate)
@@ -40,7 +42,8 @@ def main():
     print("Score before training: ", neural_network.score(inputs, targets))
 
     save_local_gradients = True
-    errors = neural_network.train(inputs, targets, epochs=epochs, save_local_gradients=save_local_gradients)
+    errors, epochs_trained = neural_network.train(inputs, targets, epochs=epochs,
+                                                  save_local_gradients=save_local_gradients, tolerance=tolerance)
 
     print("Score after training: ", neural_network.score(inputs, targets))
 
@@ -56,11 +59,11 @@ def main():
     print("Plotting results...")
     print()
 
-    gr.plot_energy(epochs, errors, number_of_data_points=len(inputs))
-    gr.plot_errors(epochs, errors, number_of_data_points=len(inputs))
+    gr.plot_energy(epochs_trained, errors, number_of_data_points=len(inputs))
+    gr.plot_errors(epochs_trained, errors, number_of_data_points=len(inputs))
 
     if save_local_gradients:
-        gr.plot_local_gradients(neural_network, epochs, number_of_data_points=len(inputs))
+        gr.plot_local_gradients(neural_network, epochs_trained, number_of_data_points=len(inputs))
 
 
 if __name__ == "__main__":
