@@ -48,6 +48,7 @@ print()
 print("Plotting results...")
 print()
 
+gr.plot_energy(epochs, errors, number_of_data_points=len(inputs))
 gr.plot_errors(epochs, errors, number_of_data_points=len(inputs))
 
 if save_local_gradients:

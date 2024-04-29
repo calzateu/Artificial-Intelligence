@@ -2,6 +2,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def plot_energy(epochs, errors, number_of_data_points):
+    print("Plotting energy...")
+    epochs_list = [i * number_of_data_points for i in range(epochs)]
+
+    error_means = 1/2*np.mean(errors, axis=1)
+
+    plt.plot(error_means)
+    plt.vlines(x=epochs_list, ymin=min(error_means), ymax=max(error_means), colors='r', linestyles='dashed', label="Epochs")
+
+    plt.title("Energy over epochs")
+    plt.ylabel("Energy")
+    plt.xlabel("Epochs")
+    plt.show()
+
+
 def plot_errors(epochs, errors, number_of_data_points):
     print("Plotting errors...")
     epochs_list = [i * number_of_data_points for i in range(epochs)]
@@ -14,9 +29,11 @@ def plot_errors(epochs, errors, number_of_data_points):
         ax[i].set_title(f"Output {i + 1} error")
         ax[i].set_ylabel("Error")
         ax[i].set_xlabel("Data point index over epochs")
-        ax[i].plot(errors[:, i])
 
-        ax[i].vlines(x=epochs_list, ymin=0, ymax=1, colors='r', linestyles='dashed', label="Epochs")
+        error_output = errors[:, i]
+        ax[i].plot(error_output)
+
+        ax[i].vlines(x=epochs_list, ymin=min(error_output), ymax=max(error_output), colors='r', linestyles='dashed', label="Epochs")
 
     plt.legend()
     plt.show()
