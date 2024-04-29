@@ -1,3 +1,4 @@
+import cost_and_activation_functions as ca
 import numpy as np
 
 
@@ -9,19 +10,10 @@ class Neuron:
     def __linear_combination(self, inputs):
         return np.dot(inputs, self.weights)
 
-    def __activation(self, z):
-        return 1 / (1 + np.exp(-z))
-
-    def __activation_derivative(self, z):
-        return z * (1 - z)
-
-    def cost_function(self, targets, outputs):
-        return
-
     def forward(self, inputs):
         linear_combination = self.__linear_combination(inputs)
-        self.activation_derivative_inputs = self.__activation_derivative(linear_combination)
-        forwarded_inputs = self.__activation(linear_combination)
+        self.activation_derivative_inputs = ca.derivative_activation(linear_combination)
+        forwarded_inputs = ca.activation(linear_combination)
         return forwarded_inputs
 
     def update_weights(self, inputs, local_gradient, learning_rate):
