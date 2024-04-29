@@ -20,7 +20,6 @@ def preprocess_data(subsample: pd.DataFrame) -> pd.DataFrame:
     Preprocess the data by standardizing it and converting it to a numpy array.
     Args:
         subsample: The data to be preprocessed.
-        subsample_size: The size of the subsample to be used.
     Returns:
         The preprocessed data as a pd.DataFrame.
     """
