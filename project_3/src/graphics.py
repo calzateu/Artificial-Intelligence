@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_errors(epochs, errors, number_of_data_points):
@@ -35,3 +36,24 @@ def plot_local_gradients(neural_network, epochs, number_of_data_points):
                          ymax=max(neural_network.layers[i].local_gradients_matrix[:, j]), colors='r', linestyles='dashed', label="Epochs")
 
         plt.show()
+
+    # Now plot the mean of local gradients over each layer in the same plot
+    fig, ax = plt.subplots(neural_network.n_layers, 1)
+    min_lim = float('inf')
+    max_lim = float('-inf')
+    for i, layer in enumerate(neural_network.layers):
+        ax[i].set_title(f"Mean of local gradients for layer {i + 1}")
+        ax[i].set_ylabel("Local gradient")
+        ax[i].set_xlabel("Data point index")
+
+        means = np.mean(neural_network.layers[i].local_gradients_matrix, axis=1)
+        ax[i].plot(means)
+
+        min_lim = min(min_lim, min(means))
+        max_lim = max(max_lim, max(means))
+
+    for i in range(neural_network.n_layers):
+        ax[i].vlines(x=epochs_list, ymin=min_lim, ymax=max_lim, colors='r', linestyles='dashed',
+                     label="Epochs")
+
+    plt.show()
