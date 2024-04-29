@@ -25,7 +25,8 @@ targets = data_copy[['X3', 'X4']].to_numpy()
 print("Score: ", neural_network.score(inputs, targets))
 
 epochs = 10
-errors = neural_network.train(inputs, targets, epochs=epochs)
+save_local_gradients = True
+errors = neural_network.train(inputs, targets, epochs=epochs, save_local_gradients=save_local_gradients)
 
 print("Score: ", neural_network.score(inputs, targets))
 
@@ -39,3 +40,6 @@ for observation in observations:
     print(f"Target at observation {observation}: {targets[observation]} and output: {outputs[observation]}")
 
 gr.plot_errors(epochs, errors, number_of_data_points=len(inputs))
+
+if save_local_gradients:
+    gr.plot_local_gradients(neural_network, epochs, number_of_data_points=len(inputs))

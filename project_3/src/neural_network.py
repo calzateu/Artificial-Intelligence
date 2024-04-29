@@ -15,6 +15,9 @@ class Layer:
         for i, neuron in enumerate(self.neurons):
             self.weights[:, i:i + 1] = neuron.weights
 
+        # If we want to store the local gradients over the course of training
+        self.local_gradients_matrix = None
+
     def forward(self, inputs):
         self.inputs = inputs
         self.forwarded_inputs = np.zeros(self.n_neurons)
@@ -66,6 +69,7 @@ class NeuralNetwork:
         self.layers += [Layer(n_neurons=n_outputs, n_inputs=hidden_layers[-1])]
 
         self.learning_rate = learning_rate
+        self.n_layers = len(self.layers)
 
     def forward(self, inputs):
         output = inputs
@@ -82,17 +86,22 @@ class NeuralNetwork:
             predictions[i] = self.layers[-1].forwarded_inputs
         return predictions
 
-    def backward(self, targets):
+    def backward(self, targets, save_local_gradients=False, current_index=0):
         local_gradients = self.layers[-1].local_gradient_last_layer(targets)
-        for i in reversed(range(len(self.layers))):
-            if i != len(self.layers) - 1:
+        for i in reversed(range(self.n_layers)):
+            if i != self.n_layers - 1:
                 w = self.layers[i+1].weights
                 local_gradients = self.layers[i].local_gradient_hidden_layer(w, local_gradients)
 
             layer = self.layers[i]
             layer.update_neurons(local_gradients, self.learning_rate)
 
-        return ca.calculate_output_error_mse(targets, self.layers[-1].forwarded_inputs)
+            if save_local_gradients:
+                self.layers[i].local_gradients_matrix[current_index] = local_gradients
+
+        final_error = ca.calculate_output_error_mse(targets, self.layers[-1].forwarded_inputs)
+
+        return final_error
 
     def score(self, inputs, targets):
         error = 0
@@ -101,11 +110,17 @@ class NeuralNetwork:
             error += ca.calculate_output_error_mse(targets[i], self.layers[-1].forwarded_inputs)
         return error
 
-    def train(self, inputs, targets, epochs=1):
+    def train(self, inputs, targets, epochs=1, save_local_gradients=False):
         indices = np.arange(len(inputs))
 
         # Used to store the errors for each row of each epoch
-        errors = np.zeros((epochs * len(indices), self.n_outputs))
+        number_of_rows = epochs * len(indices)
+        errors = np.zeros((number_of_rows, self.n_outputs))
+
+        # Initialize local gradients matrix for each layer if return_local_gradients is True
+        if save_local_gradients:
+            for layer in self.layers:
+                layer.local_gradients_matrix = np.zeros((number_of_rows, layer.n_neurons))
 
         cont = 0
         for i in range(epochs):
@@ -114,8 +129,7 @@ class NeuralNetwork:
                 self.forward(inputs[j])
 
                 # Backpropagation
-                error = self.backward(targets[j])
-                errors[cont] = self.backward(targets[j])
+                errors[cont] = self.backward(targets[j], save_local_gradients, cont)
                 cont += 1
 
         return errors
