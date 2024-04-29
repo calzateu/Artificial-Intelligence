@@ -1,5 +1,5 @@
+import graphics as gr
 import data_processing as dp
-import numpy as np
 import neural_network as nn
 import pandas as pd
 
@@ -24,12 +24,18 @@ targets = data_copy[['X3', 'X4']].to_numpy()
 
 print("Score: ", neural_network.score(inputs, targets))
 
-outputs = neural_network.train(inputs, targets, epochs=50)
+epochs = 10
+errors = neural_network.train(inputs, targets, epochs=epochs)
 
 print("Score: ", neural_network.score(inputs, targets))
 
 print(data_copy.head())
 
+
+outputs = neural_network.predict_dataset(inputs)
+
 observations = [0, 1, 2, 900]
 for observation in observations:
     print(f"Target at observation {observation}: {targets[observation]} and output: {outputs[observation]}")
+
+gr.plot_errors(epochs, errors, number_of_data_points=len(inputs))

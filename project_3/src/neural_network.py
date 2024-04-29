@@ -75,6 +75,13 @@ class NeuralNetwork:
 
         return output
 
+    def predict_dataset(self, inputs):
+        predictions = np.zeros((len(inputs), self.n_outputs))
+        for i in range(len(inputs)):
+            self.forward(inputs[i])
+            predictions[i] = self.layers[-1].forwarded_inputs
+        return predictions
+
     def backward(self, targets):
         local_gradients = self.layers[-1].local_gradient_last_layer(targets)
         for i in reversed(range(len(self.layers))):
@@ -96,11 +103,19 @@ class NeuralNetwork:
 
     def train(self, inputs, targets, epochs=1):
         indices = np.arange(len(inputs))
-        outputs = np.zeros((len(inputs), self.n_outputs))
+
+        # Used to store the errors for each row of each epoch
+        errors = np.zeros((epochs * len(indices), self.n_outputs))
+
+        cont = 0
         for i in range(epochs):
             np.random.shuffle(indices)
             for j in indices:
-                outputs[j] = self.forward(inputs[j])
-                error = self.backward(targets[j])
+                self.forward(inputs[j])
 
-        return outputs
+                # Backpropagation
+                error = self.backward(targets[j])
+                errors[cont] = self.backward(targets[j])
+                cont += 1
+
+        return errors
